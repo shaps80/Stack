@@ -7,7 +7,7 @@
 
 ## Why is Stack better than other solutions?
 
-The best way to understand why Stack is a safer, much simpler implementation when dealing with CoreData, is to see some code.
+The best way to understand why Stack is a safer, much simpler implementation for working with CoreData, is to see some code.
 
 ```objc
 for (int i = 0; i < 1000; i++) {
@@ -32,6 +32,8 @@ for (int i = 0; i < 1000; i++) {
     });
   }
 ```
+
+Notice we never reference an `NSManagedObjectContext` and barely even touch an `NSManagedObject` ;)
 
 Lets break down the code to understand the benefits.
 
