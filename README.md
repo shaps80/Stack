@@ -87,15 +87,15 @@ Hopefully now its a little more obvious how much simpler it is to work with Core
 Stack makes this easy by providing a simple interface compared to most other implementations.
 
 ```objc
-@property (nonatomic, copy, readonly) StackQuery *(^wherePredicate)(NSPredicate *predicate);
-@property (nonatomic, copy, readonly) StackQuery *(^where)(NSString *format, ...);
-@property (nonatomic, copy, readonly) StackQuery *(^sort)(NSString *key, BOOL ascending);
-@property (nonatomic, copy, readonly) StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
-@property (nonatomic, copy, readonly) void (^delete)();
-@property (nonatomic, copy, readonly) NSUInteger (^count)();
-@property (nonatomic, copy, readonly) NSArray *(^fetch)();
-@property (nonatomic, copy, readonly) id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
-@property (nonatomic, copy, readonly) NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
+@property (nonatomic, readonly) StackQuery *(^wherePredicate)(NSPredicate *predicate);
+@property (nonatomic, readonly) StackQuery *(^where)(NSString *format, ...);
+@property (nonatomic, readonly) StackQuery *(^sort)(NSString *key, BOOL ascending);
+@property (nonatomic, readonly) StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
+@property (nonatomic, readonly) void (^delete)();
+@property (nonatomic, readonly) NSUInteger (^count)();
+@property (nonatomic, readonly) NSArray *(^fetch)();
+@property (nonatomic, readonly) id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
+@property (nonatomic, readonly) NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
 ```
 
 Even my own previous implementations were much more cumbersome than this. Stack provides just 9 block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations were accounted for. Here's just a few for comparison:
