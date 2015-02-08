@@ -5,6 +5,12 @@
 [![License](https://img.shields.io/cocoapods/l/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![Platform](https://img.shields.io/cocoapods/p/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 
+Stack was created to provide a more expressive, safe and clean implementation for a CoreData stack implementation.
+
+Stack provides block chaining to allow you to better construct your queries, as well as a transaction block to allow you to better batch a series of requests, improving performance.
+
+Stack also provides cleaner implementations for specifying sort descriptors and predicates.
+
 ## A quick comparison
 
 The best way to understand why Stack is a safer, much simpler implementation for working with CoreData, is to see some code.
@@ -112,13 +118,26 @@ Even my own previous implementations were much more cumbersome than this. Stack 
 + (NSArray *)allSorted:(NSArray *)sortDescriptors predicate:(NSPredicate *)predicate faulted:(BOOL)faulted inContext:(NSManagedObjectContext *)context;
 ```
 
+All methods require you to pass in the current `NSManagedObjectContext` as well. This helped the implementer to keep their code safe from threading issues, but still allowed you to make silly decisions at times. 
+
 >And that's not even including all the variations of those methods.
+
+## How is Stack safer
+
+CoreData is unfortunately terrible when it comes to multi-threading. Apple made things a little easier with the introduction of `-performBlock:` but this still requires the implementer to think about their thread usage.
+
+Stack attempts to go one step further by removing the necessity for the implementer to konw about the context at all.
+
+Instead all `write` actions _must_ be performed inside a transaction block, where the context is managed for you.
+`Stack.defaultStack.transaction(^{  ...  })`
+
+Read actions can occur anywhere, since those are not a concern. By forcing you to use a transaction block for all saves, Stack can provide better exception and error handling. In fact if you attempt to write to any context outside of a transaction block (even if you're not using Stack directly), an exception will be thrown, making it much easier to find threading issues in your project.
+
+There may be times however where you `read` on one thread but want to update on another. By using a `transaction` block, Stack will throw an exception so that you can update your code fast.
 
 ## Usage
 
 To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
-## Requirements
 
 ## Installation
 
