@@ -81,41 +81,34 @@ for (int i = 0; i < 1000; i++) {
   }
 ```
 
-## Breakdown of the Stack Implementation
+## Interface
 
-Notice we never reference an `NSManagedObjectContext` and barely even touch an `NSManagedObject` ;)
+Hopefully now its a little more obvious how much simpler it is to work with CoreData.
+Stack makes this easy by providing a simple interface compared to most other implementations.
 
-Lets break down the code to understand the benefits.
-
-First we grab the defaultStack and create a transaction to improve performance and limit our hits to disk:
 ```objc
-Stack.defaultStack.transaction();
+@property (nonatomic, copy, readonly) StackQuery *(^wherePredicate)(NSPredicate *predicate);
+@property (nonatomic, copy, readonly) StackQuery *(^where)(NSString *format, ...);
+@property (nonatomic, copy, readonly) StackQuery *(^sort)(NSString *key, BOOL ascending);
+@property (nonatomic, copy, readonly) StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
+@property (nonatomic, copy, readonly) void (^delete)();
+@property (nonatomic, copy, readonly) NSUInteger (^count)();
+@property (nonatomic, copy, readonly) NSArray *(^fetch)();
+@property (nonatomic, copy, readonly) id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
+@property (nonatomic, copy, readonly) NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
 ```
 
-We then query CoreData for an instance of Person with the specified identifier:
+Even my own previous implementations were much more cumbersome than this. Stack provides just 9 block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations were accounted for. Here's just a few for comparison:
+
 ```objc
-Person *person = Person.query.whereIdentifier(identifier, YES);
++ (void)deleteAllMatching:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
++ (NSArray *)objectsWithIdentifiers:(NSArray *)identifiers sorting:(NSArray *)sortDescriptors faulted:(BOOL)faulted create:(BOOL)create inContext:(NSManagedObjectContext *)context;
++ (instancetype)objectWithIdentifier:(id)identifier faulted:(BOOL)faulted create:(BOOL)create inContext:(NSManagedObjectContext *)context;
++ (NSUInteger)countAllSorted:(NSArray *)sortDescriptors predicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
++ (NSArray *)allSorted:(NSArray *)sortDescriptors predicate:(NSPredicate *)predicate faulted:(BOOL)faulted inContext:(NSManagedObjectContext *)context;
 ```
 
-Now we have our `Person` we can update some (or all) of its attributes:
-```objc
-person.update(@
-        {
-          @"name" : @"firstName",
-          @"phone" : @"phoneNumber",
-        });
-```
-
-Now we delete all `Person` objects where the name is empty.
-```objc
-Person.query.where(@"name == nil").delete();
-```
-
-Finally we fetch all current `Person` results, sorted by name in ascending order and grouped by role.
-```objc
-NSArray *people = Person.query.sort(@"name", YES).groupBy(@"role").fetch();
-NSLog(@"%@", people);
-```
+>And that's not even including all the variations of those methods.
 
 ## Usage
 
