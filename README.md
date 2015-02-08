@@ -24,7 +24,7 @@ for (int i = 0; i < 1000; i++) {
         });
         
         Person.query.where(@"name == nil").delete();
-        NSArray *people = Person.query.sort(@"name", YES).results();
+        NSArray *people = Person.query.sort(@"name", YES).fetch();
         
         NSLog(@"%@", people);
       }
