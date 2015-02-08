@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/cocoapods/l/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![Platform](https://img.shields.io/cocoapods/p/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 
-## Why is Stack better than other solutions?
+## A quick comparison
 
 The best way to understand why Stack is a safer, much simpler implementation for working with CoreData, is to see some code.
 
@@ -80,6 +80,8 @@ for (int i = 0; i < 1000; i++) {
     }];
   }
 ```
+
+## Breakdown of the Stack Implementation
 
 Notice we never reference an `NSManagedObjectContext` and barely even touch an `NSManagedObject` ;)
 
