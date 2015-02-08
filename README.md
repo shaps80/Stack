@@ -111,7 +111,7 @@ Person.query.where(@"name == nil").delete();
 
 Finally we fetch all current `Person` results, sorted by name in ascending order and grouped by role.
 ```objc
-NSArray *people = Person.query.sort(@"name", YES).groupBy(@"role").results();
+NSArray *people = Person.query.sort(@"name", YES).groupBy(@"role").fetch();
 NSLog(@"%@", people);
 ```
 
