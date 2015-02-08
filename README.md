@@ -98,6 +98,10 @@ Stack makes this easy by providing a simple interface compared to most other imp
 @property ... NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
 ```
 
+Notice most of the implementations return an instance of `StackQuery`, allowing you to chain in any combination. 
+
+>Note when calling any of the `sort`, `predicate` or `where` methods multiple times, the last call will be used.
+
 Even my own previous implementations were much more cumbersome than this. Stack provides just 9 block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations were accounted for. Here's just a few for comparison:
 
 ```objc
