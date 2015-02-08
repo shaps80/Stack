@@ -19,17 +19,65 @@ for (int i = 0; i < 1000; i++) {
         
         person.update(@
         {
-          @"name" : @"firstName",
-          @"phone" : @"phoneNumber",
+          @"name" : attributes[@"name"],
+          @"phone" : attributes[@"phone_number"],
         });
         
         Person.query.where(@"name == nil").delete();
-        NSArray *people = Person.query.sort(@"name", YES).groupBy(@"name").results();
+        NSArray *people = Person.query.sort(@"name", YES).results();
         
         NSLog(@"%@", people);
       }
       
     });
+  }
+```
+
+Lets contrast this with a naive approach we might normally see implemented.
+
+```objc
+for (int i = 0; i < 1000; i++) {
+    NSManagedObjectContext *context = [NSManagedObjectContext new];
+    
+    [context performBlockAndWait:^{
+      
+      for (int j = 0; j < 1000; j++) {
+        NSString *identifier = [NSString stringWithFormat:@"10%zd%dz", i, j];
+        NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:Person.entityName];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", @"identifier", identifier];
+        
+        request.predicate = predicate;
+        request.fetchLimit = 1;
+        
+        Person *person = (Person *)[context executeFetchRequest:request error:nil].firstObject;
+        
+        if (!person) {
+          person = [NSEntityDescription insertNewObjectForEntityForName:Person.entityName inManagedObjectContext:context];
+        }
+        
+        [person setValue:attributes[@"name"] forKey:@"name"];
+        [person setValue:attributes[@"phone_number"] forKey:@"phone"];
+        
+        request = [NSFetchRequest fetchRequestWithEntityName:Person.entityName];
+        request.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES] ];
+        request.predicate = [NSPredicate predicateWithFormat:@"name == nil"];
+        
+        NSArray *people = [context executeFetchRequest:request error:nil];
+        
+        for (Person *person in people) {
+          [context deleteObject:person];
+        }
+        
+        request = [NSFetchRequest fetchRequestWithEntityName:Person.entityName];
+        request.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES] ];
+        
+        people = [context executeFetchRequest:request error:nil];
+        NSLog(@"%@", people);
+      }
+      
+      [context save:nil];
+      
+    }];
   }
 ```
 
