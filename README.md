@@ -133,11 +133,15 @@ Instead all `write` actions _must_ be performed inside a transaction block, wher
 
 Read actions can occur anywhere, since those are not a concern. By forcing you to use a transaction block for all saves, Stack can provide better exception and error handling. In fact if you attempt to write to any context outside of a transaction block (even if you're not using Stack directly), an exception will be thrown, making it much easier to find threading issues in your project.
 
-There may be times however where you `read` on one thread but want to update on another. By using a `transaction` block, Stack will throw an exception so that you can update your code fast.
+Sometimes however you need to `read` on one thread but want to `write` on another. By adding objects to your `transaction` block, Stack will fetch new copies for you on the right thread. 
+
+Still need to find a clean interface for doing this????????????????????????
+
+>Just make sure you do any updates inside the transaction, otherwise your changes won't persist.
 
 ## Usage
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+To run the example project, clone the repo, and run `pod install` from the Example directory first.	
 
 ## Installation
 
