@@ -126,16 +126,22 @@ All methods require you to pass in the current `NSManagedObjectContext` as well.
 
 CoreData is unfortunately terrible when it comes to multi-threading. Apple made things a little easier with the introduction of `-performBlock:` but this still requires the implementer to think about their thread usage.
 
-Stack attempts to go one step further by removing the necessity for the implementer to konw about the context at all.
+Stack attempts to go one step further by removing the necessity for the implementer to know about the context at all.
 
 Instead all `write` actions _must_ be performed inside a transaction block, where the context is managed for you.
 `Stack.defaultStack.transaction(^{  ...  })`
 
 Read actions can occur anywhere, since those are not a concern. By forcing you to use a transaction block for all saves, Stack can provide better exception and error handling. In fact if you attempt to write to any context outside of a transaction block (even if you're not using Stack directly), an exception will be thrown, making it much easier to find threading issues in your project.
 
-Sometimes however you need to `read` on one thread but want to `write` on another. By adding objects to your `transaction` block, Stack will fetch new copies for you on the right thread. 
+Sometimes however you need to `read` on one thread but want to `write` on another. Stack provides a convenient method macro for copying your objects into the current context for you:
 
-Still need to find a clean interface for doing this????????????????????????
+```objc
+@stack_copy(...)
+@stack_copy(people)
+@stack_copy(person1, person2)
+```
+
+This allows you to copy an array, a single object, or some variation since the macro uses variadic arguments.
 
 >Just make sure you do any updates inside the transaction, otherwise your changes won't persist.
 

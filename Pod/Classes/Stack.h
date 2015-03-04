@@ -37,7 +37,8 @@
 /**
  *  A transaction can be used to batch mutliple queries, improving performance in some cases.
  */
-@property (nonatomic, readonly) StackTransaction *(^transaction)();
+@property (nonatomic, readonly) void (^syncTransaction)(void (^transactionBlock)());
+@property (nonatomic, readonly) void (^asyncTransaction)(void (^transactionBlock)());
 
 
 /**
@@ -48,7 +49,7 @@
 
 
 /**
- *  Returns the default stack configuration. This implementation uses a parent-child based stack. The defaultStack is persisted to memory only.
+ *  Returns the default stack configuration. This implementation uses a parent-child based stack. The defaultStack is loaded into memory only.
  *  @return A shared in-memory instance
  */
 + (instancetype)memoryStack;

@@ -52,6 +52,8 @@
 		54E053611A86FB6F00B01B07 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		54E053621A86FB6F00B01B07 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
 		54E053631A86FB6F00B01B07 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
+		54E202A71AA77B90004AECC4 /* metamacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
+		54E202A81AA77CB4004AECC4 /* EXTScope.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXTScope.h; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* Stack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -130,6 +132,8 @@
 				54E0535F1A86F8C700B01B07 /* StackTransaction.m */,
 				54E053581A86F8C700B01B07 /* NSManagedObject+StackAdditions.h */,
 				54E053591A86F8C700B01B07 /* NSManagedObject+StackAdditions.m */,
+				54E202A71AA77B90004AECC4 /* metamacros.h */,
+				54E202A81AA77CB4004AECC4 /* EXTScope.h */,
 			);
 			name = Classes;
 			path = ../Pod/Classes;

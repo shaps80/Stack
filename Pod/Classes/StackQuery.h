@@ -43,7 +43,7 @@
  *  Adds a predicate to this query, via a format string
  *  @param format The format string to use to build the predicate
  */
-@property (nonatomic, readonly) StackQuery *(^where)(NSString *format, ...);
+@property (nonatomic, readonly) StackQuery *(^whereFormat)(NSString *format, ...);
 
 
 /**
@@ -51,7 +51,7 @@
  *  @param key        The sortkey to sort by
  *  @param ascending  If YES, sorting will be in ascending order, otherwise descending will be used
  */
-@property (nonatomic, readonly) StackQuery *(^sort)(NSString *key, BOOL ascending);
+@property (nonatomic, readonly) StackQuery *(^sortByKey)(NSString *key, BOOL ascending);
 
 
 /**

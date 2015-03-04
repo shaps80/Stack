@@ -7,12 +7,18 @@
 //
 
 #import "Person.h"
-
+#import "Stack.h"
 
 @implementation Person
 
 @dynamic identifier;
 @dynamic name;
 @dynamic phone;
+
+- (void (^)(NSDictionary *))update
+{
+  return ^(NSDictionary *attributes) {
+  };
+}
 
 @end

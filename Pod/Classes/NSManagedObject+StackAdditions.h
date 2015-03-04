@@ -37,7 +37,7 @@
  *  Updates this object with the specified dictionary
  *  @param attributes The update attributes to apply to this object
  */
-@property (nonatomic, copy, readonly) id (^update)(NSDictionary *attributes);
+@property (nonatomic, copy, readonly) void (^update)(NSDictionary *attributes);
 
 
 /**

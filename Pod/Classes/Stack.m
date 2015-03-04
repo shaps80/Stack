@@ -26,7 +26,7 @@
 #import "Stack.h"
 #import "SPXDefines.h"
 
-static NSMutableDictionary * RegisteredStacks;
+static NSMutableDictionary * __registeredStacks;
 
 static NSString *const DefaultStackName = @"_DefaultStack";
 static NSString *const ManualStackName = @"_ManualStack";
@@ -87,19 +87,19 @@ static NSString *const MemoryStackName = @"_MemoryStack";
 
 + (instancetype)stackNamed:(NSString *)name
 {
-  return RegisteredStacks[name];
+  return __registeredStacks[name];
 }
 
 + (instancetype)registerStackWithName:(NSString *)name model:(NSManagedObjectModel *)model storeURL:(NSURL *)storeURL inMemoryOnly:(BOOL)memoryOnly
 {
-  SPXAssertTrueOrReturnNil(!RegisteredStacks[name]);
+  SPXAssertTrueOrReturnNil(!__registeredStacks[name]);
   
-  if (!RegisteredStacks) {
-    RegisteredStacks = [NSMutableDictionary new];
+  if (!__registeredStacks) {
+    __registeredStacks = [NSMutableDictionary new];
   }
   
   Stack *stack = [[Stack alloc] initWithName:name model:model storeURL:storeURL inMemoryOnly:memoryOnly];
-  RegisteredStacks[name] = stack;
+  __registeredStacks[name] = stack;
   
   return stack;
 }
@@ -109,15 +109,27 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   self = [super init];
   SPXAssertTrueOrReturnNil(self);
   
-  if (memoryOnly) {
-    
-  }
   
   return self;
 }
 
 #pragma mark - Transactions
 
+- (void (^)(void (^)()))syncTransaction
+{
+  return ^(void (^transactionBlock)()) {
+    SPXAssertTrueOrReturn(transactionBlock);
+    !transactionBlock ?: transactionBlock();
+  };
+}
+
+- (void (^)(void (^)()))asyncTransaction
+{
+  return ^(void (^transactionBlock)()) {
+    SPXAssertTrueOrReturn(transactionBlock);
+    !transactionBlock ?: transactionBlock();
+  };
+}
 
 #pragma mark - Helpers
 

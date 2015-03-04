@@ -25,6 +25,7 @@
 
 #import "Stack.h"
 #import "NSManagedObject+StackAdditions.h"
+#import "SPXDefines.h"
 
 @interface Stack (Private)
 - (NSString *)entityNameForClass:(Class)klass;
@@ -32,9 +33,20 @@
 
 @implementation NSManagedObject (StackAdditions)
 
-- (void)updateWithAttributes:(NSDictionary *)attributes
+- (void (^)(NSDictionary *))update
 {
-  
+  __weak typeof(self) weakInstance = self;
+  return ^(NSDictionary *attributes) {
+    for (id key in attributes.allKeys) {
+      [weakInstance setValue:attributes[key] forKey:key];
+    }
+  };
+}
+
+- (id)valueForUndefinedKey:(NSString *)key
+{
+  SPXLog(@"%@ doesn't recognise the keyPath: %@", self, key);
+  return [super valueForUndefinedKey:key];
 }
 
 + (NSString *)entityName
@@ -45,11 +57,6 @@
 + (StackQuery *)query
 {
   return [StackQuery new];
-}
-
-- (id (^)(NSDictionary *))update
-{
-  return nil;
 }
 
 - (void (^)())delete

@@ -22,7 +22,7 @@
   NSDictionary *attributes = nil;
   
   for (int i = 0; i < 1000; i++) {
-    Stack.defaultStack.transaction(^{
+    Stack.defaultStack.syncTransaction(^{
       
       for (int j = 0; j < 1000; j++) {
         NSString *identifier = [NSString stringWithFormat:@"10%zd%dz", i, j];
@@ -34,8 +34,8 @@
           @"phone" : attributes[@"phone_number"],
         });
         
-        Person.query.sort(@"name", YES).delete();
-        NSArray *people = Person.query.sort(@"name", YES).fetch();
+        Person.query.sortByKey(@"name", YES).delete();
+        NSArray *people = Person.query.sortByKey(@"name", YES).fetch();
         
         NSLog(@"%@", people);
       }
