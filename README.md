@@ -1,6 +1,6 @@
 # Stack
 
-[![CI Status](http://img.shields.io/travis/Shaps Mohsenin/Stack.svg?style=flat)](https://travis-ci.org/Shaps Mohsenin/Stack)
+[![CI Status](http://img.shields.io/travis/shaps80/Stack.svg?style=flat)](https://travis-ci.org/Shaps Mohsenin/Stack)
 [![Version](https://img.shields.io/cocoapods/v/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![License](https://img.shields.io/cocoapods/l/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![Platform](https://img.shields.io/cocoapods/p/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
@@ -10,6 +10,22 @@ Stack was created to provide a more expressive, safe and clean implementation fo
 Stack provides block chaining to allow you to better construct your queries, as well as a transaction block to allow you to better batch a series of requests, improving performance.
 
 Stack also provides cleaner implementations for specifying sort descriptors and predicates.
+
+## Goal
+
+Stack aims to provide a clean and safe abstraction from Core Data that gives your the flexibility and power of CoreData without all the context/thread-safety concerns. This is achieved by having complete thread and transaction based context management built right in.
+
+You wouldn't manage the storage and usage of a CATransaction would you? So why do we still have to think about NSManagedObjectContext?
+
+This is an idea or concept for how I wish CoreData worked out of the box. I'm really keen to get thoughts, suggestions and ideas so please generate a PR or post any issues if you want to contribute ;)
+
+## Features
+
+* Extremely lightweight -- yet powerful -- CoreData stack -- just 3 classes!!!
+* Full NSManagedObjectContext management -- you don't have to think about it and should never hold a reference to one
+* Clean block based API
+* Chain based API allowing you to chain multiple commands together
+* Transaction blocks -- supporting nesting, siblings and reentrancy
 
 ## Safer
 
@@ -155,6 +171,10 @@ Stack is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
     pod "Stack"
+    
+## Note
+
+* UNIT TESTS! Although I have done extensive manual testing particuarly around threading and context's, the project doesn't currently have any unit tests. They are being written as you read this and will be included in the next release. Note: I've been using this now in 2 personal projects with no major issues.
 
 ## Author
 
@@ -163,4 +183,9 @@ Shaps Mohsenin, shaps@theappbusiness.com
 ## License
 
 Stack is available under the MIT license. See the LICENSE file for more info.
+
+## Attribution
+
+* All code is my own, no 3rd party code is used in this project at all. 
+* Thanks to [Nick Lockwood](http://github.com/nicklockwood) for help around the transaction API
 
