@@ -41,6 +41,7 @@
   for (int i = 0; i < 100; i++) {
 
     stack.transaction(^{
+      stack.query(Person.class).whereIdentifiers(@[ @"", @"", @"" ], YES);
       
       NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];
       Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);

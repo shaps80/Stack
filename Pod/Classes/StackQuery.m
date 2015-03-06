@@ -82,7 +82,7 @@
     id object = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
     [object setValue:identifier forKey:[self.managedObjectClass identifierKey]];
     
-    self.fetchRequest.fetchLimit = limit;
+    [self resetFetchRequest];
     return object;
   };
 }
@@ -101,6 +101,7 @@
     }
     
     if (objects.count == identifiers.count || !createIfNil) {
+      [self resetFetchRequest];
       return objects;
     }
     
@@ -118,7 +119,10 @@
       [results addObject:newObject];
     }
     
-    return [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
+    objects = [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
+    [self resetFetchRequest];
+    
+    return objects;
   };
 }
 
@@ -200,6 +204,7 @@
       SPXLog(@"%@", error);
     }
     
+    [self resetFetchRequest];
     return count;
   };
 }
@@ -213,6 +218,20 @@
     for (id object in objects) {
       [self.managedObjectContext deleteObject:object];
     }
+    
+    [self resetFetchRequest];
+  };
+}
+
+- (void (^)(NSArray *))deleteObjects
+{
+  return ^(NSArray *objects) {
+    for (id object in objects) {
+      SPXAssertTrueOrReturn([object isKindOfClass:[NSManagedObject class]]);
+      [self.managedObjectContext deleteObject:object];
+    }
+    
+    [self resetFetchRequest];
   };
 }
 
@@ -226,8 +245,14 @@
       SPXLog(@"%@", error);
     }
     
+    [self resetFetchRequest];
     return objects;
   };
+}
+
+- (void)resetFetchRequest
+{
+  self.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:self.fetchRequest.entityName];
 }
 
 - (NSString *)description

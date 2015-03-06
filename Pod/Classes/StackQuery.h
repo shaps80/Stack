@@ -91,6 +91,9 @@
 @property (nonatomic, readonly) void (^delete)();
 
 
+@property (nonatomic, readonly) void (^deleteObjects)(NSArray *objects);
+
+
 /**
  *  Returns the number of objects that would be returned for this query. This will not fetch the objects themselves.
  */

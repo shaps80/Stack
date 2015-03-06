@@ -132,9 +132,27 @@ describe(@"StackQuery", ^{
       [[className should] equal:NSStringFromClass(Person.class)];
     });
     
-    it(@"deleting objects should return 0", ^{
-      query.delete();
-      [[theValue(query.count()) should] equal:theValue(0)];
+    context(@"Deleting", ^{
+      
+      it(@"should delete all items", ^{
+        Stack.defaultStack.transaction(^{
+          query.delete();
+        }).synchronous(YES);
+        
+        [[theValue(query.count()) should] equal:theValue(0)];
+      });
+      
+      it(@"Should delete specific items", ^{
+        [[theValue(query.count()) should] equal:theValue(names.count)];
+        
+        Stack.memoryStack.transaction(^{
+          id object = query.whereIdentifier(@"1", NO);
+          query.deleteObjects(@[ object ]);
+        }).synchronous(YES);
+        
+        [[theValue(query.count()) should] equal:theValue(names.count - 1)];
+      });
+      
     });
     
   });
@@ -158,8 +176,8 @@ describe(@"StackQuery", ^{
     });
     
     it(@"should find 3 matches", ^{
-      query.whereIdentifiers(@[ @"0", @"1", @"2" ], NO);
-      [[theValue(query.count()) should] equal:theValue(3)];
+      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2" ], NO);
+      [[theValue(objects.count) should] equal:theValue(3)];
     });
     
     it(@"should create 1 new record", ^{
