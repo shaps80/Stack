@@ -70,7 +70,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   NSManagedObjectModel *model = self.managedObjectModel;
   NSMutableDictionary *mappings = [NSMutableDictionary new];
   
-  [model.entitiesByName enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSString *entityName, NSEntityDescription *entityDescription, BOOL *stop) {
+  [model.entitiesByName enumerateKeysAndObjectsUsingBlock:^(NSString *entityName, NSEntityDescription *entityDescription, BOOL *stop) {
     mappings[entityDescription.managedObjectClassName] = entityName;
   }];
 
