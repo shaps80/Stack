@@ -23,6 +23,9 @@
  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef __STACK_DEFINES_H
+#define __STACK_DEFINES_H
+
 #import "metamacros.h"
 
 extern NSString *const __stackThreadContextKey;
@@ -82,5 +85,8 @@ if ([metamacro_concat(VAR, CONTEXT) isKindOfClass:[NSManagedObjectID class]]) { 
 #define _stack_keywordify autoreleasepool {}
 #else
 #define _stack_keywordify try {} @catch (...) {}
+#endif
+
+
 #endif
 

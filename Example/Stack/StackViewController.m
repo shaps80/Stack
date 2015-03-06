@@ -19,10 +19,14 @@
 {
   [super viewDidLoad];
   
-  Stack *stack = [Stack defaultStack];
+  Stack *stack = [Stack memoryStack];
   StackQuery *query = stack.query(Person.class);
   
   [self createObjectsWithQuery:query stack:stack];
+  
+  Person *person = query.fetch().firstObject;
+  [self updateObject:person withStack:stack];
+  
   [self deleteObjectsWithQuery:query];
 }
 
@@ -46,6 +50,18 @@
   }
   
   NSLog(@"%zd", query.count());
+}
+
+- (void)updateObject:(Person *)person withStack:(Stack *)stack
+{
+  NSLog(@"Before: %@", person.name);
+  
+  stack.transaction(^{
+    @stack_copy(person);
+    person.name = @"Mohsenin";
+  }).synchronous(YES);
+  
+  NSLog(@"After: %@", [stack.query(person.class).fetch().firstObject name]);
 }
 
 @end

@@ -26,6 +26,7 @@ This is an idea or concept for how I wish CoreData worked out of the box. I'm re
 * Clean block based API
 * Chain based API allowing you to chain multiple commands together
 * Transaction blocks -- supporting nesting, siblings and reentrancy
+* @stack_copy(...) convenience macro for passing objects across threads -- my fave feature!
 
 ## Safer
 
