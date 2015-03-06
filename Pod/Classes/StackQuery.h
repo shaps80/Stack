@@ -33,6 +33,12 @@
 
 
 /**
+ *  Returns a new configured NSFetchedResultsController
+ */
+@property (nonatomic, readonly) NSFetchedResultsController *(^fetchedResultsController)(NSString *sectionNameKeyPath, id <NSFetchedResultsControllerDelegate> delegate);
+
+
+/**
  *  Adds a predicate to this query
  *  @param predicate  The predicate to apply
  */
@@ -91,6 +97,9 @@
 @property (nonatomic, readonly) void (^delete)();
 
 
+/**
+ *  Deletes the specified objects from this query
+ */
 @property (nonatomic, readonly) void (^deleteObjects)(NSArray *objects);
 
 

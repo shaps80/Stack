@@ -188,6 +188,25 @@ describe(@"StackQuery", ^{
     
   });
   
+  context(@"Fetched Results Controller", ^{
+    
+    it(@"should return a new fetchedResultsController configured with the current query", ^{
+      id delegate = [NSObject new];
+      
+      query.whereFormat(@"name != nil").sortByKey(@"name", YES);
+      NSFetchedResultsController *controller = query.fetchedResultsController(@"section", delegate);
+      
+      [[controller.sectionNameKeyPath should] equal:@"section"];
+      [[((NSObject *)controller.delegate) should] equal:delegate];
+      [[controller.fetchRequest.predicate should] equal:[NSPredicate predicateWithFormat:@"name != nil"]];
+      [[theValue(controller.fetchRequest.sortDescriptors.count) should] equal:theValue(1)];
+      NSSortDescriptor *sorting = controller.fetchRequest.sortDescriptors.firstObject;
+      [[sorting.key should] equal:@"name"];
+      [[theValue(sorting.ascending) should] equal:theValue(YES)];
+    });
+    
+  });
+  
 });
 
 SPEC_END

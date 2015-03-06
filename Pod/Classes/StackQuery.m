@@ -29,6 +29,7 @@
 #import "Stack.h"
 
 @interface Stack (Private)
+@property (nonatomic, readonly) NSManagedObjectContext *mainThreadContext;
 @property (nonatomic, readonly) NSManagedObjectContext *currentThreadContext;
 @end
 
@@ -56,6 +57,16 @@
 - (NSManagedObjectContext *)managedObjectContext
 {
   return self.stack.currentThreadContext;
+}
+
+- (NSFetchedResultsController *(^)(NSString *, id<NSFetchedResultsControllerDelegate>))fetchedResultsController
+{
+  return ^(NSString *sectionNameKeyPath, id <NSFetchedResultsControllerDelegate> delegate) {
+    SPXCAssertTrueOrPerformAction([NSThread isMainThread], return (NSFetchedResultsController *)nil);
+    NSFetchedResultsController *controller = [[NSFetchedResultsController alloc] initWithFetchRequest:self.fetchRequest managedObjectContext:self.stack.mainThreadContext sectionNameKeyPath:sectionNameKeyPath cacheName:nil];
+    controller.delegate = delegate;
+    return controller;
+  };
 }
 
 - (id (^)(NSString *, BOOL))whereIdentifier
