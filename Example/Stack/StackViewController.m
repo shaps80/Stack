@@ -22,22 +22,30 @@
   Stack *stack = [Stack defaultStack];
   StackQuery *query = stack.query(Person.class);
   
+  [self createObjectsWithQuery:query stack:stack];
+  [self deleteObjectsWithQuery:query];
+}
+
+- (void)deleteObjectsWithQuery:(StackQuery *)query
+{
   query.delete();
+  NSLog(@"%zd", query.count());
+}
+
+- (void)createObjectsWithQuery:(StackQuery *)query stack:(Stack *)stack
+{
+  for (int i = 0; i < 100; i++) {
+
+    stack.transaction(^{
+      
+      NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];
+      Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);
+      person.name = @"Shaps";
+      
+    }).synchronous(YES);
+  }
   
-  NSUInteger count = query.count();
-  NSLog(@"%zd", count);
-  
-  
-//  for (int i = 0; i < 100; i++) {
-//
-//    stack.transaction(^{
-//      
-//      NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];
-//      Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);
-//      person.name = @"Shaps";
-//      
-//    }).synchronous(YES);
-//  }
+  NSLog(@"%zd", query.count());
 }
 
 @end
