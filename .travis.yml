@@ -6,9 +6,7 @@ language: objective-c
 # cache: cocoapods
 # podfile: Example/Podfile
 before_install:
-- gem install cocoapods # Since Travis is not always on latest version
-- rm -rf Example/Pods/
-- rm Example/Podfile.lock
+# - gem install cocoapods # Since Travis is not always on latest version
 - pod install --project-directory=Example
 
 install:
