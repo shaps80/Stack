@@ -62,8 +62,9 @@ NSDictionary *attributes = @
 	@"phone" : @"555-2321"
 };
 
-Stack.defaultStack.transaction(^{    
-    Person *person = Person.query.whereIdentifier(@"124", YES);
+Stack *stack = [Stack defaultStack];
+stack.transaction(^{    
+    Person *person = stack.query(Person.class).whereIdentifier(@"124", YES);
     person.update(attributes);    
     NSLog(@"%@", person);
  });
