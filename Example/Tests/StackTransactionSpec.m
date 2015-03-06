@@ -134,6 +134,17 @@ describe(@"StackTransaction", ^{
       });
     });
     
+    it(@"object context should be from a different thread when @stack_copy is NOT used", ^{
+      __block Person *person = query.whereIdentifier(@"0", NO);
+      __block NSManagedObjectContext *context1 = nil, *context2 = nil;
+      
+      stack.transaction(^{
+        context1 = person.managedObjectContext;
+        context2 = [NSThread currentThread].threadDictionary[__stackThreadContextKey];
+        [[context1 shouldNot] equal:context2];
+      }).synchronous(YES);
+    });
+    
   });
   
 });
