@@ -47,7 +47,7 @@ Stack *stack = [Stack defaultStack];
       @stack_copy(person);
       person.name = @"Anne";
       
-    }).synchronous(); // person.name is safely updated
+    }).synchronous(YES); // person.name is safely updated
   });
 ```
 
@@ -112,7 +112,7 @@ Stack makes this easy by providing a simple interface compared to most other imp
 ```objc
 @property ... StackQuery *(^wherePredicate)(NSPredicate *predicate);
 @property ... StackQuery *(^where)(NSString *format, ...);
-@property ... StackQuery *(^sort)(NSString *key, BOOL ascending);
+@property ... StackQuery *(^sortByKey)(NSString *key, BOOL ascending);
 @property ... StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
 @property ... void (^delete)();
 @property ... NSUInteger (^count)();
@@ -125,7 +125,7 @@ Notice most of the implementations return an instance of `StackQuery`, allowing 
 
 >Note when calling any of the `sort`, `predicate` or `where` methods multiple times, the last call will be used.
 
-Even my own previous implementations were much more cumbersome than this. Stack provides just 9 block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations were accounted for. Here's just a few for comparison:
+Even my own previous implementations were much more cumbersome than this. Stack provides just a few block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations or features were accounted for. Here's just a few for comparison:
 
 ```objc
 + (void)deleteAllMatching:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
