@@ -38,7 +38,7 @@ You can even use Stack queries in, out and around the transaction because Stack 
 
 ```objc
 Stack *stack = [Stack defaultStack];
-  Person *person = Person.query.whereIdentifier(@"1234", YES);
+  Person *person = stack.query(Person.class).whereIdentifier(@"1234", YES);
   // person.name is 'Shaps'
   
   dispatch_async(dispatch_get_global_queue(0, 0), ^{
