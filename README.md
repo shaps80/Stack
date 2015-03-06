@@ -189,4 +189,5 @@ Stack is available under the MIT license. See the LICENSE file for more info.
 
 * All code is my own, no 3rd party code is used in this project at all. 
 * Thanks to [Nick Lockwood](http://github.com/nicklockwood) for help around the transaction API
+* Thanks to [Krzysztof Zablocki](https://github.com/krzysztofzablocki) for the block based inspiration
 
