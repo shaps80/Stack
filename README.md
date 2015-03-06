@@ -112,9 +112,9 @@ You can easily create a NSFetchedResultsController from any query in Stack.
 
 ```objc
 controller = stack.query(Account.class).sortByKey(@"email", YES).fetchedResultsController(section, delegate);
+```
 
 Stack will automatically setup the context and fetch request for you.
-```
 
 ## Interface
 
