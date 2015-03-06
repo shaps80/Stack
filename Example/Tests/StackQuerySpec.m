@@ -186,6 +186,16 @@ describe(@"StackQuery", ^{
       [[theValue(query.count()) should] equal:theValue(names.count + 1)];
     });
     
+    it(@"should return an object with the specified objectID", ^{
+      Person *person = query.whereIdentifier(@"1", NO);
+      
+      Stack.defaultStack.transaction(^{
+        Person *p = query.whereObjectID(person.objectID);
+        [[p.objectID should] equal:person.objectID];
+        [[p.name should] equal:person.name];
+      });
+    });
+    
   });
   
   context(@"Fetched Results Controller", ^{

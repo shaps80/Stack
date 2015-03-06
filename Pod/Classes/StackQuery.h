@@ -131,6 +131,12 @@
 @property (nonatomic, readonly) NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
 
 
+/* 
+ *  Returns the object for the specified ID if it is already registered, otherwise it creates a fault corresponding to that objectID.  It never returns nil, and never performs I/O.  The object specified by objectID is assumed to exist, and if that assumption is wrong the fault may throw an exception when used.
+ */
+@property (nonatomic, readonly) id (^whereObjectID)(NSManagedObjectID *objectID);
+
+
 @end
 
 

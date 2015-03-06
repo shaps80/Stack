@@ -137,6 +137,13 @@
   };
 }
 
+- (id (^)(NSManagedObjectID *))whereObjectID
+{
+  return ^(NSManagedObjectID *objectID) {
+    return [self.managedObjectContext objectWithID:objectID];
+  };
+}
+
 - (StackQuery *(^)(NSString *, BOOL))sortByKey
 {
   return ^(NSString *sortKey, BOOL ascending) {
