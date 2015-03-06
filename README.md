@@ -27,6 +27,7 @@ This is an idea or concept for how I wish CoreData worked out of the box. I'm re
 * Chain based API allowing you to chain multiple commands together
 * Transaction blocks -- supporting nesting, siblings and reentrancy
 * @stack_copy(...) convenience macro for passing objects across threads -- my fave feature!
+* NSFetchedResultsController convenience method for creating them for you
 
 ## Safer
 
@@ -103,6 +104,16 @@ NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcur
     
   [context save:nil];
 }];
+```
+
+## NSFetchedResultsController
+
+You can easily create a NSFetchedResultsController from any query in Stack.
+
+```objc
+controller = stack.query(Account.class).sortByKey(@"email", YES).fetchedResultsController(section, delegate);
+
+Stack will automatically setup the context and fetch request for you.
 ```
 
 ## Interface
