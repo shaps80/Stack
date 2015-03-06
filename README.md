@@ -80,7 +80,7 @@ NSDictionary *attributes = @
 	@"phone" : @"555-2321"
 };
 
-NSManagedObjectContext *context = [NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
   
 [context performBlockAndWait:^{
   NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:Person.entityName];
