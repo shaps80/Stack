@@ -30,7 +30,56 @@
 SPEC_BEGIN(StackTransactionSpec)
 
 describe(@"StackTransaction", ^{
+  
+  Stack *stack = [Stack memoryStack];
+  
+  __block StackQuery *query = nil;
+  __block NSArray *names = nil;
+  
+  beforeEach(^{
+    names = @[ @"Shaps", @"Anne", @"Dave", @"Roger", @"Bethany", @"Cyndia", @"Steve" ];
+    
+    Stack.memoryStack.transaction(^{
+      for (NSUInteger i = 0; i < names.count; i++) {
+        NSString *identifier = [NSString stringWithFormat:@"%zd", i];
+        Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
+        person.name = names[i];
+      }
+    }).synchronous(YES);
+    
+    query = Stack.memoryStack.query(Person.class);
+  });
+  
+  afterEach(^{
+    Stack.memoryStack.query(Person.class).delete();
+  });
 
+  context(@"Operations", ^{
+    
+    it(@"should perform a synchronous operation", ^{
+      __block NSUInteger count = 0;
+      
+      stack.transaction(^{
+        count = query.count();
+      }).synchronous(NO);
+      
+      [[theValue(count) should] equal:theValue(names.count)];
+    });
+    
+    it(@"should perform an asynchronous operation", ^{
+      __block NSUInteger count = 0;
+      
+      stack.transaction(^{
+        count = query.count();
+      }).asynchronous(NO, ^{
+        [[theValue(count) should] equal:theValue(names.count)];
+      });
+      
+      [[theValue(count) should] equal:theValue(0)];
+    });
+    
+  });
+  
 });
 
 SPEC_END
