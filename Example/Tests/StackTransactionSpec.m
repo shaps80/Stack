@@ -80,6 +80,62 @@ describe(@"StackTransaction", ^{
     
   });
   
+  context(@"Threading", ^{
+    
+    it(@"context should see updates from another thread", ^{
+      __block Person *person = query.whereIdentifier(@"0", NO);
+      
+      stack.transaction(^{
+        @stack_copy(person);
+        person.name = @"Jeff";
+      }).asynchronous(YES, ^{
+        person = query.whereIdentifier(@"0", NO);
+        [[person.name should] equal:@"Jeff"];
+      });
+    });
+    
+    it(@"context should exist per thread", ^{
+      __block Person *person = query.whereIdentifier(@"0", NO);
+      __block NSManagedObjectContext *context1 = nil, *context2 = nil;
+      
+      stack.transaction(^{
+        @stack_copy(person);
+        context1 = person.managedObjectContext;
+      }).asynchronous(YES, ^{
+        person = query.whereIdentifier(@"0", NO);
+        context2 = person.managedObjectContext;
+        
+        [[context1 shouldNot] equal:context2];
+      });
+    });
+    
+    it(@"inner context's parent should be the same as outer context's parent", ^{
+      __block Person *person = query.whereIdentifier(@"0", NO);
+      __block NSManagedObjectContext *context1 = nil, *context2 = nil;
+      
+      stack.transaction(^{
+        @stack_copy(person);
+        context1 = person.managedObjectContext;
+      }).asynchronous(YES, ^{
+        person = query.whereIdentifier(@"0", NO);
+        context2 = person.managedObjectContext;
+        
+        [[context1.parentContext should] equal:context2.parentContext];
+      });
+    });
+    
+    it(@"context thread should be the current thread", ^{
+      stack.transaction(^{
+        NSThread *thread = [NSThread currentThread];
+        NSManagedObjectContext *threadContext = thread.threadDictionary[__stackThreadContextKey];
+        
+        Person *person = query.whereIdentifier(@"0", NO);
+        [[person.managedObjectContext should] equal:threadContext];
+      });
+    });
+    
+  });
+  
 });
 
 SPEC_END
