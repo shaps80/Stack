@@ -15,10 +15,10 @@
 @dynamic name;
 @dynamic phone;
 
-- (void (^)(NSDictionary *))update
-{
-  return ^(NSDictionary *attributes) {
-  };
-}
+//- (void (^)(NSDictionary *))update
+//{
+//  return ^(NSDictionary *attributes) {
+//  };
+//}
 
 @end

@@ -62,6 +62,30 @@
 
 
 /**
+ *  Ensures all returned objects are faulted when fetched
+ */
+@property (nonatomic, readonly) StackQuery *(^faultFilled)();
+
+
+/**
+ *  Limits the number of fetched results to cache when fetched
+ */
+@property (nonatomic, readonly) StackQuery *(^limit)(NSUInteger limit);
+
+
+/**
+ *  Offsets the start index for the fetched results to cacht when fetched
+ */
+@property (nonatomic, readonly) StackQuery *(^offset)(NSUInteger offset);
+
+
+/**
+ *  Limits the size of the cache when fetched
+ */
+@property (nonatomic, readonly) StackQuery *(^batchSize)(NSUInteger size);
+
+
+/**
  *  Deletes the objects returned from this query
  */
 @property (nonatomic, readonly) void (^delete)();

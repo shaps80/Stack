@@ -19,37 +19,25 @@
 {
   [super viewDidLoad];
   
-  NSDictionary *attributes = nil;
+  Stack *stack = [Stack defaultStack];
+  StackQuery *query = stack.query(Person.class);
   
-  for (int i = 0; i < 1000; i++) {
-    Stack.defaultStack.syncTransaction(^{
-      
-      for (int j = 0; j < 1000; j++) {
-        NSString *identifier = [NSString stringWithFormat:@"10%zd%dz", i, j];
-        Person *person = Person.query.whereIdentifier(identifier, YES);
-        
-        person.update(@
-        {
-          @"name" : attributes[@"name"],
-          @"phone" : attributes[@"phone_number"],
-        });
-        
-        Person.query.sortByKey(@"name", YES).delete();
-        NSArray *people = Person.query.sortByKey(@"name", YES).fetch();
-        
-        NSLog(@"%@", people);
-      }
-      
-    });
-  }
+  query.delete();
   
-//  NSArray *people = Person.query.where(@"name == shaps").fetch();
+  NSUInteger count = query.count();
+  NSLog(@"%zd", count);
   
-  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-    
-//    Stack.defaultStack.transaction
-    
-  });
+  
+//  for (int i = 0; i < 100; i++) {
+//
+//    stack.transaction(^{
+//      
+//      NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];
+//      Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);
+//      person.name = @"Shaps";
+//      
+//    }).synchronous(YES);
+//  }
 }
 
 @end

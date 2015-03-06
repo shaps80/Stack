@@ -27,9 +27,6 @@
 #import "NSManagedObject+StackAdditions.h"
 #import "SPXDefines.h"
 
-@interface Stack (Private)
-- (NSString *)entityNameForClass:(Class)klass;
-@end
 
 @implementation NSManagedObject (StackAdditions)
 
@@ -49,19 +46,9 @@
   return [super valueForUndefinedKey:key];
 }
 
-+ (NSString *)entityName
++ (NSString *)identifierKey
 {
-  return nil;
-}
-
-+ (StackQuery *)query
-{
-  return [StackQuery new];
-}
-
-- (void (^)())delete
-{
-  return nil;
+  return @"identifier";
 }
 
 @end

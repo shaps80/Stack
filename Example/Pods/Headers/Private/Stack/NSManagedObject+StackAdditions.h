@@ -1,1 +1,1 @@
-../../../../../Pod/Classes/NSManagedObject+StackAdditions.h
+../../../../../Pod/Classes/Internal/NSManagedObject+StackAdditions.h

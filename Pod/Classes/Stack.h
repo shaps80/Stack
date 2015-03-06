@@ -23,7 +23,7 @@
  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "StackQuery.h"
+#import "StackDefines.h"
 #import "StackTransaction.h"
 #import "NSManagedObject+StackAdditions.h"
 
@@ -35,10 +35,25 @@
 
 
 /**
- *  A transaction can be used to batch mutliple queries, improving performance in some cases.
+ *  A transaction can be used to batch mutliple queries, improving performance in some cases. Can be nested and called reentrantly
+ *
+ *  @note Thanks to Nick Lockwood for the solution around this approach
  */
-@property (nonatomic, readonly) void (^syncTransaction)(void (^transactionBlock)());
-@property (nonatomic, readonly) void (^asyncTransaction)(void (^transactionBlock)());
+@property (nonatomic, readonly) StackTransaction* (^transaction)(void (^transactionBlock)());
+
+
+/**
+ *  Returns a new query instance, allowing you to run queries on the specified managedObjectClass
+ *
+ *  @return A new StackQuery instance
+ */
+@property (nonatomic, readonly) StackQuery* (^query)(Class managedObjectClass);
+
+
+/**
+ *  Returns the entity name for the specified NSManagedObjectClass in this stack.
+ */
+@property (nonatomic, readonly) NSString* (^entityNameForClass)(Class managedObjectClass);
 
 
 /**

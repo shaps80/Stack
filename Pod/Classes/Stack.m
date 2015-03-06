@@ -27,29 +27,43 @@
 #import "SPXDefines.h"
 
 static NSMutableDictionary * __registeredStacks;
+NSString *const __stackThreadContextKey = @"__stackContextKey";
+NSString *const __stackTransactionKey = @"__stackTransactionKey";
 
-static NSString *const DefaultStackName = @"_DefaultStack";
-static NSString *const ManualStackName = @"_ManualStack";
-static NSString *const MemoryStackName = @"_MemoryStack";
+
+@interface StackTransaction (Private)
+@property (nonatomic, weak) Stack *stack;
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, copy) void (^transactionBlock)();
+@property (nonatomic, copy) void (^transactionCompletionBlock)();
+@end
+
+
+@interface StackQuery (Private)
+@property (nonatomic, weak) Stack *stack;
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
++ (instancetype)queryForManagedObjectClass:(Class)managedObjectClass entityName:(NSString *)entityName;
+@end
+
 
 @interface Stack ()
+
+@property (nonatomic, strong) NSDictionary *entityNameToClassMappings;
+@property (nonatomic, strong) NSPersistentStoreCoordinator *coordinator;
 @property (nonatomic, strong) NSManagedObjectModel *managedObjectModel;
-@property (nonatomic, strong) NSDictionary *entityToClassNameMappings;
+
+@property (nonatomic, strong) NSManagedObjectContext *rootContext;
+@property (nonatomic, strong) NSManagedObjectContext *mainThreadContext;
+@property (nonatomic, strong) NSManagedObjectContext *transactionContext;
+@property (nonatomic, strong) NSManagedObjectContext *currentThreadContext;
+
 @end
 
 @implementation Stack
 
+@synthesize currentThreadContext = _currentThreadContext;
+
 #pragma mark - Initializers
-
-- (NSDictionary *)entityToClassNameMappings
-{
-  return _entityToClassNameMappings ?: (_entityToClassNameMappings = [NSDictionary new]);
-}
-
-- (NSString *)entityNameForClass:(Class)klass
-{
-  return self.entityToClassNameMappings[NSStringFromClass(klass)];
-}
 
 - (void)loadEntityMappings
 {
@@ -59,8 +73,8 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   [model.entitiesByName enumerateKeysAndObjectsUsingBlock:^(NSString *entityName, NSEntityDescription *entityDescription, BOOL *stop) {
     mappings[entityDescription.managedObjectClassName] = entityName;
   }];
-  
-  self.entityToClassNameMappings = mappings.copy;
+
+  self.entityNameToClassMappings = mappings.copy;
 }
 
 + (instancetype)defaultStack
@@ -68,7 +82,8 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   static Stack *_defaultStack = nil;
   static dispatch_once_t oncePredicate;
   dispatch_once(&oncePredicate, ^{
-    _defaultStack = [Stack registerStackWithName:DefaultStackName model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:NO];
+    NSString *name = [NSBundle mainBundle].infoDictionary[@"CFBundleName"];
+    _defaultStack = [Stack registerStackWithName:name model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:NO];
   });
   
   return _defaultStack;
@@ -79,7 +94,8 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   static Stack *_memoryStack = nil;
   static dispatch_once_t oncePredicate;
   dispatch_once(&oncePredicate, ^{
-    _memoryStack = [Stack registerStackWithName:MemoryStackName model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:YES];
+    NSString *name = [NSBundle mainBundle].infoDictionary[@"CFBundleName"];
+    _memoryStack = [Stack registerStackWithName:name model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:YES];
   });
   
   return _memoryStack;
@@ -98,6 +114,10 @@ static NSString *const MemoryStackName = @"_MemoryStack";
     __registeredStacks = [NSMutableDictionary new];
   }
   
+  if (__registeredStacks[name]) {
+    return __registeredStacks[name];
+  }
+  
   Stack *stack = [[Stack alloc] initWithName:name model:model storeURL:storeURL inMemoryOnly:memoryOnly];
   __registeredStacks[name] = stack;
   
@@ -109,26 +129,44 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   self = [super init];
   SPXAssertTrueOrReturnNil(self);
   
+  _managedObjectModel = model;
+  _coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+  SPXAssertTrueOrReturnNil(_coordinator);
+  
+  NSError *error = nil;
+  NSDictionary *autoMigratingOptions = self.class.autoMigratingOptions;
+  NSPersistentStore *store = nil;
+  
+  if (memoryOnly) {
+    store = [_coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:autoMigratingOptions error:&error];
+  } else {
+    store = [_coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:autoMigratingOptions error:&error];
+  }
+  
+  if (error) {
+    SPXLog(@"%@", error);
+    error = nil;
+  }
+  
+  if (!store && !memoryOnly) {
+    if (![[NSFileManager defaultManager] removeItemAtURL:storeURL error:&error]) {
+      SPXLog(@"%@", error);
+    }
+    
+    store = [_coordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:autoMigratingOptions error:&error];
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    SPXAssertTrueOrReturnNil(store);
+  }
+  
+  _rootContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+  _rootContext.persistentStoreCoordinator = _coordinator;
+  [self loadEntityMappings];
   
   return self;
-}
-
-#pragma mark - Transactions
-
-- (void (^)(void (^)()))syncTransaction
-{
-  return ^(void (^transactionBlock)()) {
-    SPXAssertTrueOrReturn(transactionBlock);
-    !transactionBlock ?: transactionBlock();
-  };
-}
-
-- (void (^)(void (^)()))asyncTransaction
-{
-  return ^(void (^transactionBlock)()) {
-    SPXAssertTrueOrReturn(transactionBlock);
-    !transactionBlock ?: transactionBlock();
-  };
 }
 
 #pragma mark - Helpers
@@ -143,6 +181,148 @@ static NSString *const MemoryStackName = @"_MemoryStack";
   NSURL *url = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
   NSString *storeName = [NSBundle mainBundle].infoDictionary[@"CFBundleName"];
   return [url URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite", storeName]];
+}
+
++ (NSDictionary *)autoMigratingOptions
+{
+  return @{  NSMigratePersistentStoresAutomaticallyOption : @(YES),
+             NSInferMappingModelAutomaticallyOption       : @(YES),
+             };
+}
+
++ (void)handleError:(NSError *)error
+{
+  for (NSArray *detailedError in error.userInfo.allValues) {
+    if ([detailedError isKindOfClass:[NSArray class]]) {
+      for (NSError *err in detailedError) {
+        if ([err respondsToSelector:@selector(userInfo)]) {
+          SPXLog(@"Error Details: %@", err.userInfo);
+        } else {
+          SPXLog(@"Error Details: %@", err);
+        }
+      }
+    } else {
+      SPXLog(@"Error: %@", detailedError);
+    }
+  }
+  
+  SPXLog(@"Error Message: %@", [error localizedDescription]);
+  SPXLog(@"Error Domain: %@", [error domain]);
+  SPXLog(@"Recovery Suggestion: %@", [error localizedRecoverySuggestion]);
+}
+
+#pragma mark - Contexts
+
+- (NSManagedObjectContext *)mainThreadContext
+{
+  return _mainThreadContext ?: ({
+    NSManagedObjectContext *mainThreadContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+    mainThreadContext.parentContext = self.rootContext;
+    _mainThreadContext = mainThreadContext;
+  });
+}
+
+- (void)setCurrentThreadContext:(NSManagedObjectContext *)context
+{
+  NSThread *thread = NSThread.currentThread;
+  thread.threadDictionary[__stackThreadContextKey] = context;
+}
+
+- (NSManagedObjectContext *)currentThreadContext
+{
+  NSManagedObjectContext *context = nil;
+  NSThread *thread = NSThread.currentThread;
+  
+  context = thread.threadDictionary[__stackThreadContextKey];
+  
+  if (!context) {
+    if (NSThread.isMainThread) {
+      context = self.mainThreadContext;
+    } else {
+      context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+      context.parentContext = self.mainThreadContext;
+    }
+    
+    self.currentThreadContext = context;
+  }
+  
+  return context;
+}
+
+- (NSManagedObjectContext *)transactionContext
+{
+  NSManagedObjectContext *context = [[self transactionStack].lastObject managedObjectContext];
+  
+  if (!context) {
+    context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    context.parentContext = self.mainThreadContext;
+    [self.transactionStack.lastObject setManagedObjectContext:context];
+  }
+
+  return context;
+}
+
+#pragma mark - Queries
+
+- (NSString *(^)(__unsafe_unretained Class))entityNameForClass
+{
+  return ^(__unsafe_unretained Class managedObjectClass) {
+    return self.entityNameToClassMappings[NSStringFromClass(managedObjectClass)];
+  };
+}
+
+- (StackQuery *(^)(__unsafe_unretained Class))query
+{
+  return ^(__unsafe_unretained Class managedObjectClass) {
+    StackQuery *query = [StackQuery queryForManagedObjectClass:managedObjectClass entityName:self.entityNameForClass(managedObjectClass)];
+    query.stack = self;
+    return query;
+  };
+}
+
+#pragma mark - Transactions
+
+- (NSMutableArray *)transactionStack
+{
+  NSThread *thread = NSThread.currentThread;
+  NSMutableArray *stack = thread.threadDictionary[__stackTransactionKey];
+  
+  if (!stack) {
+    stack = [NSMutableArray new];
+    thread.threadDictionary[__stackTransactionKey] = stack;
+  }
+  
+  return stack;
+}
+
+- (StackTransaction *)pushTransaction
+{
+  NSMutableArray *stack = [self transactionStack];
+  StackTransaction *transaction = [StackTransaction new];
+  transaction.stack = self;
+  [stack addObject:transaction];
+  return transaction;
+}
+
+- (void)popTransaction
+{
+  NSMutableArray *stack = [self transactionStack];
+  [stack removeLastObject];
+}
+
+- (StackTransaction *(^)(void (^transactionBlock)()))transaction
+{  
+  __weak typeof(self) weakInstance = self;
+  return ^(void (^transactionBlock)()) {
+    StackTransaction *transaction = [weakInstance pushTransaction];
+    
+    transaction.transactionCompletionBlock = ^{
+      [weakInstance popTransaction];
+    };
+    
+    transaction.transactionBlock = transactionBlock;
+    return transaction;
+  };  
 }
 
 @end

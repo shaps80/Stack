@@ -41,25 +41,10 @@
 
 
 /**
- *  Deletes this object
+ *  The property (key) on this object to use as an identifier. Defaults to objectID.
+ *  If [self.class instancesRespondsToSelector:@"identifier"] this will automatically be used instead. Override in your subclass to return a different key.
  */
-@property (nonatomic, copy, readonly) void (^delete)();
-
-
-/**
- *  Returns a new query instance, allowing you to run queries on this entity
- *
- *  @return A new StackQuery instance
- */
-+ (StackQuery *)query;
-
-
-/**
- *  Returns the entity name associated with this class
- *
- *  @return The entity name defines in CoreData
- */
-+ (NSString *)entityName;
++ (NSString *)identifierKey;
 
 
 @end

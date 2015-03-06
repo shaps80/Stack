@@ -23,13 +23,66 @@
  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import <CoreData/CoreData.h>
+#import "NSManagedObjectContext+StackAdditions.h"
 #import "StackTransaction.h"
+#import "Stack.h"
+
+@interface Stack ()
+- (NSManagedObjectContext *)transactionContext;
+@property (nonatomic, strong) NSManagedObjectContext *currentThreadContext;
+@end
+
+@interface StackTransaction ()
+
+@property (nonatomic, weak) Stack *stack;
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+
+@property (nonatomic, copy) void (^transactionCompletionBlock)();
+@property (nonatomic, copy) void (^transactionBlock)();
+
+@end
 
 @implementation StackTransaction
 
-+ (instancetype)transactionWithBlock:(void (^)())transaction;
+- (void (^)(BOOL save))synchronous
 {
-  return nil;
+  return ^(BOOL save) {
+    NSManagedObjectContext *context = [self.stack transactionContext];
+    
+    [context performBlockAndWait:^{
+      self.stack.currentThreadContext = context;
+      !self.transactionBlock ?: self.transactionBlock();
+      
+      if (save) {
+        [context saveSynchronously:YES completion:nil];
+      }
+    }];
+    
+    !self.transactionCompletionBlock ?: self.transactionCompletionBlock();
+  };
+}
+
+- (void (^)(BOOL save, void (^completion)()))asynchronous
+{
+  return ^(BOOL save, void (^completion)()) {
+    NSManagedObjectContext *context = [self.stack transactionContext];
+    
+    [context performBlock:^{
+      self.stack.currentThreadContext = context;
+      !self.transactionBlock ?: self.transactionBlock();
+      
+      if (save) {
+        [context saveSynchronously:NO completion:^(BOOL success, NSError *error) {
+          !completion ?: completion();
+        }];
+      } else {
+        !completion ?: completion();
+      }
+      
+      !self.transactionCompletionBlock ?: self.transactionCompletionBlock();
+    }];
+  };
 }
 
 @end

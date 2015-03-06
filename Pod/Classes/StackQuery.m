@@ -24,47 +24,210 @@
  */
 
 #import "StackQuery.h"
+#import "NSManagedObject+StackAdditions.h"
+#import "SPXDefines.h"
+#import "Stack.h"
+
+@interface Stack (Private)
+@property (nonatomic, readonly) NSManagedObjectContext *currentThreadContext;
+@end
+
+@interface StackTransaction (Private)
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+@end
+
+@interface StackQuery ()
+@property (nonatomic, weak) Stack *stack;
+@property (nonatomic, assign) Class managedObjectClass;
+@property (nonatomic, strong) NSFetchRequest *fetchRequest;
+@property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+@end
 
 @implementation StackQuery
 
-- (id (^)(NSString *))object
++ (instancetype)queryForManagedObjectClass:(Class)managedObjectClass entityName:(NSString *)entityName
 {
-  return nil;
+  StackQuery *query = [StackQuery new];
+  query.managedObjectClass = managedObjectClass;
+  query.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+  return query;
 }
 
-- (id (^)(NSString *))objectOrCreate
+- (NSManagedObjectContext *)managedObjectContext
 {
-  return nil;
+  return self.stack.currentThreadContext;
 }
 
-- (StackQuery *(^)(NSString *, ...))filter
+- (id (^)(NSString *, BOOL))whereIdentifier
 {
-  return nil;
+  id object = ^(NSString *identifier, BOOL createIfNil) {
+    NSError *error = nil;
+    
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", [self.managedObjectClass identifierKey], identifier];
+    self.fetchRequest.predicate = predicate;
+    self.fetchRequest.fetchLimit = 1;
+    
+    NSArray *results = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    if (results.count || !createIfNil) {
+      return results.firstObject;
+    }
+    
+    id object = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
+    [object setValue:identifier forKey:[self.managedObjectClass identifierKey]];
+    
+    return object;
+  };
+  
+  return object;
 }
 
-- (StackQuery *(^)(NSPredicate *))filterWithPredicate
+- (NSArray *(^)(NSArray *, BOOL))whereIdentifiers
 {
-  return nil;
+  return ^(NSArray *identifiers, BOOL createIfNil) {
+    NSError *error = nil;
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K IN %@", [self.managedObjectClass identifierKey], identifiers];
+    self.fetchRequest.predicate = predicate;
+    
+    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    if (objects.count == identifiers.count || !createIfNil) {
+      return objects;
+    }
+    
+    NSMutableArray *results = [NSMutableArray new];
+    [results addObjectsFromArray:objects];
+    
+    NSMutableSet *identifiersSet = [NSMutableSet setWithArray:identifiers];
+    NSSet *existingIdentifiersSet = [NSSet setWithArray:[objects valueForKey:[self.managedObjectClass identifierKey]]];
+    
+    [identifiersSet minusSet:existingIdentifiersSet];
+    
+    for (id identifier in identifiersSet) {
+      id newObject = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
+      [newObject setValue:identifier forKey:[self.managedObjectClass identifierKey]];
+      [results addObject:newObject];
+    }
+    
+    return [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
+  };
 }
 
-- (StackQuery *(^)(NSString *, BOOL))sort
+- (StackQuery *(^)(NSString *, BOOL))sortByKey
 {
-  return nil;
+  return ^(NSString *sortKey, BOOL ascending) {
+    self.fetchRequest.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:ascending] ];
+    return self;
+  };
 }
 
-- (StackQuery *(^)(NSArray *))sortDescriptors
+- (StackQuery *(^)(NSArray *))sortWithDescriptors
 {
-  return nil;
+  return ^(NSArray *sortDescriptors) {
+    self.fetchRequest.sortDescriptors = sortDescriptors;
+    return self;
+  };
 }
 
-- (StackQuery *(^)(NSString *))group
+- (StackQuery *(^)(NSString *, ...))whereFormat
 {
-  return nil;
+  return ^(NSString *format, ...) {
+    self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format];
+    return self;
+  };
+}
+
+- (StackQuery *(^)(NSPredicate *))wherePredicate
+{
+  return ^(NSPredicate *predicate) {
+    self.fetchRequest.predicate = predicate;
+    return self;
+  };
+}
+
+- (StackQuery *(^)())faultFilled
+{
+  return ^{
+    self.fetchRequest.returnsObjectsAsFaults = NO;
+    return self;
+  };
+}
+
+- (StackQuery *(^)(NSUInteger))limit
+{
+  return ^(NSUInteger value) {
+    self.fetchRequest.fetchLimit = value;
+    return self;
+  };
+}
+
+- (StackQuery *(^)(NSUInteger))offset
+{
+  return ^(NSUInteger value) {
+    self.fetchRequest.fetchOffset = value;
+    return self;
+  };
+}
+
+- (StackQuery *(^)(NSUInteger))batchSize
+{
+  return ^(NSUInteger value) {
+    self.fetchRequest.fetchBatchSize = value;
+    return self;
+  };
 }
 
 - (NSUInteger (^)())count
 {
-  return 0;
+  return ^{
+    __block NSError *error = nil;
+    __block NSUInteger count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    return count;
+  };
+}
+
+- (void (^)())delete
+{
+  return ^{
+    __block NSError *error = nil;
+    __block NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    
+    for (id object in objects) {
+      [self.managedObjectContext deleteObject:object];
+    }
+  };
+}
+
+- (NSArray *(^)())fetch
+{
+  return ^{
+    NSError *error = nil;
+    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    return objects;
+  };
+}
+
+- (NSString *)description
+{
+  return SPXDescription(SPXKeyPath(fetchRequest));
 }
 
 @end

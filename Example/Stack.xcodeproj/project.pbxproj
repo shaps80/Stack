@@ -41,19 +41,21 @@
 /* Begin PBXFileReference section */
 		0D4ABAE56D7BB7D51B1E4E29 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D21645429924D6028AB2321 /* Stack.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Stack.podspec; path = ../Stack.podspec; sourceTree = "<group>"; };
-		54E053581A86F8C700B01B07 /* NSManagedObject+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+StackAdditions.h"; sourceTree = "<group>"; };
-		54E053591A86F8C700B01B07 /* NSManagedObject+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+StackAdditions.m"; sourceTree = "<group>"; };
-		54E0535A1A86F8C700B01B07 /* Stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Stack.h; sourceTree = "<group>"; };
-		54E0535B1A86F8C700B01B07 /* Stack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Stack.m; sourceTree = "<group>"; };
-		54E0535C1A86F8C700B01B07 /* StackQuery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackQuery.h; sourceTree = "<group>"; };
-		54E0535D1A86F8C700B01B07 /* StackQuery.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackQuery.m; sourceTree = "<group>"; };
-		54E0535E1A86F8C700B01B07 /* StackTransaction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackTransaction.h; sourceTree = "<group>"; };
-		54E0535F1A86F8C700B01B07 /* StackTransaction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackTransaction.m; sourceTree = "<group>"; };
+		54DE4EC21AA8C436004AC3E4 /* metamacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
+		54DE4EC31AA8C436004AC3E4 /* NSManagedObject+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+StackAdditions.h"; sourceTree = "<group>"; };
+		54DE4EC41AA8C436004AC3E4 /* NSManagedObject+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+StackAdditions.m"; sourceTree = "<group>"; };
+		54DE4EC51AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+StackAdditions.h"; sourceTree = "<group>"; };
+		54DE4EC61AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+StackAdditions.m"; sourceTree = "<group>"; };
+		54DE4EC71AA8C436004AC3E4 /* StackDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackDefines.h; sourceTree = "<group>"; };
+		54DE4EC81AA8C436004AC3E4 /* Stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Stack.h; sourceTree = "<group>"; };
+		54DE4EC91AA8C436004AC3E4 /* Stack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Stack.m; sourceTree = "<group>"; };
+		54DE4ECA1AA8C436004AC3E4 /* StackQuery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackQuery.h; sourceTree = "<group>"; };
+		54DE4ECB1AA8C436004AC3E4 /* StackQuery.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackQuery.m; sourceTree = "<group>"; };
+		54DE4ECC1AA8C436004AC3E4 /* StackTransaction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackTransaction.h; sourceTree = "<group>"; };
+		54DE4ECD1AA8C436004AC3E4 /* StackTransaction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackTransaction.m; sourceTree = "<group>"; };
 		54E053611A86FB6F00B01B07 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		54E053621A86FB6F00B01B07 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
 		54E053631A86FB6F00B01B07 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
-		54E202A71AA77B90004AECC4 /* metamacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
-		54E202A81AA77CB4004AECC4 /* EXTScope.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXTScope.h; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* Stack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		6003F58F195388D20070C39A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -121,22 +123,32 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		54E053571A86F8A700B01B07 /* Classes */ = {
+		54DE4EBF1AA8C436004AC3E4 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				54E0535A1A86F8C700B01B07 /* Stack.h */,
-				54E0535B1A86F8C700B01B07 /* Stack.m */,
-				54E0535C1A86F8C700B01B07 /* StackQuery.h */,
-				54E0535D1A86F8C700B01B07 /* StackQuery.m */,
-				54E0535E1A86F8C700B01B07 /* StackTransaction.h */,
-				54E0535F1A86F8C700B01B07 /* StackTransaction.m */,
-				54E053581A86F8C700B01B07 /* NSManagedObject+StackAdditions.h */,
-				54E053591A86F8C700B01B07 /* NSManagedObject+StackAdditions.m */,
-				54E202A71AA77B90004AECC4 /* metamacros.h */,
-				54E202A81AA77CB4004AECC4 /* EXTScope.h */,
+				54DE4EC11AA8C436004AC3E4 /* Internal */,
+				54DE4EC81AA8C436004AC3E4 /* Stack.h */,
+				54DE4EC91AA8C436004AC3E4 /* Stack.m */,
+				54DE4ECA1AA8C436004AC3E4 /* StackQuery.h */,
+				54DE4ECB1AA8C436004AC3E4 /* StackQuery.m */,
+				54DE4ECC1AA8C436004AC3E4 /* StackTransaction.h */,
+				54DE4ECD1AA8C436004AC3E4 /* StackTransaction.m */,
 			);
 			name = Classes;
 			path = ../Pod/Classes;
+			sourceTree = "<group>";
+		};
+		54DE4EC11AA8C436004AC3E4 /* Internal */ = {
+			isa = PBXGroup;
+			children = (
+				54DE4EC31AA8C436004AC3E4 /* NSManagedObject+StackAdditions.h */,
+				54DE4EC41AA8C436004AC3E4 /* NSManagedObject+StackAdditions.m */,
+				54DE4EC51AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.h */,
+				54DE4EC61AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.m */,
+				54DE4EC71AA8C436004AC3E4 /* StackDefines.h */,
+				54DE4EC21AA8C436004AC3E4 /* metamacros.h */,
+			);
+			path = Internal;
 			sourceTree = "<group>";
 		};
 		54E053661A86FB7800B01B07 /* Resources */ = {
@@ -162,7 +174,7 @@
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
-				54E053571A86F8A700B01B07 /* Classes */,
+				54DE4EBF1AA8C436004AC3E4 /* Classes */,
 				6003F593195388D20070C39A /* Stack */,
 				60FF7A9C1954A5C5007DD14C /* Podspec Metadata */,
 				6003F5B5195388D20070C39A /* Tests */,
