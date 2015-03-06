@@ -70,7 +70,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   NSManagedObjectModel *model = self.managedObjectModel;
   NSMutableDictionary *mappings = [NSMutableDictionary new];
   
-  [model.entitiesByName enumerateKeysAndObjectsUsingBlock:^(NSString *entityName, NSEntityDescription *entityDescription, BOOL *stop) {
+  [model.entitiesByName enumerateKeysAndObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSString *entityName, NSEntityDescription *entityDescription, BOOL *stop) {
     mappings[entityDescription.managedObjectClassName] = entityName;
   }];
 
@@ -83,6 +83,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   static dispatch_once_t oncePredicate;
   dispatch_once(&oncePredicate, ^{
     NSString *name = [NSBundle mainBundle].infoDictionary[@"CFBundleName"];
+    name = [name stringByAppendingString:@"_Default"];
     _defaultStack = [Stack registerStackWithName:name model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:NO];
   });
   
@@ -95,6 +96,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   static dispatch_once_t oncePredicate;
   dispatch_once(&oncePredicate, ^{
     NSString *name = [NSBundle mainBundle].infoDictionary[@"CFBundleName"];
+    name = [name stringByAppendingString:@"_Memory"];
     _memoryStack = [Stack registerStackWithName:name model:Stack.defaultStackModel storeURL:Stack.defaultStackURL inMemoryOnly:YES];
   });
   
@@ -274,6 +276,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
 - (StackQuery *(^)(__unsafe_unretained Class))query
 {
   return ^(__unsafe_unretained Class managedObjectClass) {
+    SPXAssertTrueOrPerformAction([managedObjectClass isSubclassOfClass:[NSManagedObject class]], return (StackQuery *)nil);
     StackQuery *query = [StackQuery queryForManagedObjectClass:managedObjectClass entityName:self.entityNameForClass(managedObjectClass)];
     query.stack = self;
     return query;

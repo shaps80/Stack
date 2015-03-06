@@ -60,7 +60,8 @@
 
 - (id (^)(NSString *, BOOL))whereIdentifier
 {
-  id object = ^(NSString *identifier, BOOL createIfNil) {
+  return ^(NSString *identifier, BOOL createIfNil) {
+    NSUInteger limit = self.fetchRequest.fetchLimit;
     NSError *error = nil;
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", [self.managedObjectClass identifierKey], identifier];
@@ -74,16 +75,16 @@
     }
     
     if (results.count || !createIfNil) {
+      self.fetchRequest.fetchLimit = limit;
       return results.firstObject;
     }
     
     id object = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
     [object setValue:identifier forKey:[self.managedObjectClass identifierKey]];
     
+    self.fetchRequest.fetchLimit = limit;
     return object;
   };
-  
-  return object;
 }
 
 - (NSArray *(^)(NSArray *, BOOL))whereIdentifiers
@@ -140,7 +141,11 @@
 - (StackQuery *(^)(NSString *, ...))whereFormat
 {
   return ^(NSString *format, ...) {
-    self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format];
+    va_list args;
+    va_start(args, format);
+    self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format arguments:args];
+    va_end(args);
+    
     return self;
   };
 }
