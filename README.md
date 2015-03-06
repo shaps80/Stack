@@ -173,10 +173,6 @@ Stack is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
     pod "Stack"
-    
-## Note
-
-* UNIT TESTS! Although I have done extensive manual testing particuarly around threading and context's, the project doesn't currently have any unit tests. They are being written as you read this and will be included in the next release. Note: I've been using this now in 2 personal projects with no major issues.
 
 ## Author
 
