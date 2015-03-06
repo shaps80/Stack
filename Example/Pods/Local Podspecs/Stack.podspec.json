@@ -1,6 +1,6 @@
 {
   "name": "Stack",
-  "version": "1.0.0",
+  "version": "0.1.1",
   "summary": "A fresh, safer approach to CoreData",
   "description": "                       Stack provides a safer implementation for working with CoreData\n",
   "homepage": "https://github.com/shaps80/Stack",
@@ -10,7 +10,7 @@
   },
   "source": {
     "git": "https://github.com/shaps80/Stack.git",
-    "tag": "1.0.0"
+    "tag": "0.1.1"
   },
   "social_media_url": "https://twitter.com/shaps",
   "platforms": {
