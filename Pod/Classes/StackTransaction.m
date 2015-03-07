@@ -47,30 +47,33 @@
 
 - (void (^)(BOOL save))synchronous
 {
+  __weak typeof(self) weakInstance = self;
   return ^(BOOL save) {
-    NSManagedObjectContext *context = [self.stack transactionContext];
+    NSManagedObjectContext *context = [weakInstance.stack transactionContext];
     
     [context performBlockAndWait:^{
-      self.stack.currentThreadContext = context;
-      !self.transactionBlock ?: self.transactionBlock();
+      weakInstance.stack.currentThreadContext = context;
+      !weakInstance.transactionBlock ?: weakInstance.transactionBlock();
       
       if (save) {
         [context saveSynchronously:YES completion:nil];
       }
     }];
     
-    !self.transactionCompletionBlock ?: self.transactionCompletionBlock();
+    weakInstance.stack.currentThreadContext = nil;
+    !weakInstance.transactionCompletionBlock ?: weakInstance.transactionCompletionBlock();
   };
 }
 
 - (void (^)(BOOL save, void (^completion)()))asynchronous
 {
+  __weak typeof(self) weakInstance = self;
   return ^(BOOL save, void (^completion)()) {
-    NSManagedObjectContext *context = [self.stack transactionContext];
+    NSManagedObjectContext *context = [weakInstance.stack transactionContext];
     
     [context performBlock:^{
-      self.stack.currentThreadContext = context;
-      !self.transactionBlock ?: self.transactionBlock();
+      weakInstance.stack.currentThreadContext = context;
+      !weakInstance.transactionBlock ?: weakInstance.transactionBlock();
       
       if (save) {
         [context saveSynchronously:NO completion:^(BOOL success, NSError *error) {
@@ -80,8 +83,10 @@
         !completion ?: completion();
       }
       
-      !self.transactionCompletionBlock ?: self.transactionCompletionBlock();
+      !weakInstance.transactionCompletionBlock ?: weakInstance.transactionCompletionBlock();
     }];
+    
+    weakInstance.stack.currentThreadContext = nil;
   };
 }
 
