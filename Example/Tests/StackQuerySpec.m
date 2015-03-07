@@ -135,7 +135,7 @@ describe(@"StackQuery", ^{
     context(@"Deleting", ^{
       
       it(@"should delete all items", ^{
-        Stack.defaultStack.transaction(^{
+        Stack.memoryStack.transaction(^{
           query.delete();
         }).synchronous(YES);
         
@@ -189,7 +189,7 @@ describe(@"StackQuery", ^{
     it(@"should return an object with the specified objectID", ^{
       Person *person = query.whereIdentifier(@"1", NO);
       
-      Stack.defaultStack.transaction(^{
+      Stack.memoryStack.transaction(^{
         Person *p = query.whereObjectID(person.objectID);
         [[p.objectID should] equal:person.objectID];
         [[p.name should] equal:person.name];
