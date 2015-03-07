@@ -227,7 +227,12 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
 - (void)setCurrentThreadContext:(NSManagedObjectContext *)context
 {
   NSThread *thread = NSThread.currentThread;
-  thread.threadDictionary[__stackThreadContextKey] = context;
+  
+  if (context) {
+    thread.threadDictionary[__stackThreadContextKey] = context;
+  } else {
+    [thread.threadDictionary removeObjectForKey:__stackThreadContextKey];
+  }
 }
 
 - (NSManagedObjectContext *)currentThreadContext
