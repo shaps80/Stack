@@ -61,6 +61,52 @@ describe(@"Stack", ^{
     });
   });
   
+  context(@"Deletes", ^{
+
+    Stack *stack = [Stack memoryStack];
+    __block StackQuery *query = nil;
+    __block NSArray *names = nil;
+    
+    beforeEach(^{
+      names = @[ @"Shaps", @"Anne", @"Dave", @"Roger", @"Bethany", @"Cyndia", @"Steve" ];
+      
+      stack.transaction(^{
+        for (NSUInteger i = 0; i < names.count; i++) {
+          NSString *identifier = [NSString stringWithFormat:@"%zd", i];
+          Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
+          person.name = names[i];
+        }
+      });
+      
+      query = stack.query(Person.class);
+    });
+    
+    afterEach(^{
+      stack.query(Person.class).delete();
+    });
+    
+    it(@"Should delete specific items", ^{
+      [[theValue(query.count()) should] equal:theValue(names.count)];
+      
+      stack.transaction(^{
+        id object = query.whereIdentifier(@"1", NO);
+        stack.deleteObjects(@[ object ]);
+      });
+      
+      query.wherePredicate(nil);
+      [[theValue(query.count()) should] equal:theValue(names.count - 1)];
+    });
+    
+    it(@"should delete a specific NSManagedObjectID", ^{
+      stack.transaction(^{
+        NSManagedObjectID *objectID = [query.sortByKey(@"name", YES).lastObject() objectID];
+        stack.deleteWhereObjectID(objectID);
+        [[theValue(query.count()) should] equal:theValue(names.count - 1)];
+      });
+    });
+    
+  });
+  
   context(@"Queries", ^{
     it(@"should return a new query", ^{
       [[[Stack memoryStack].query(Person.class) shouldNot] beNil];
@@ -69,9 +115,13 @@ describe(@"Stack", ^{
   
   context(@"Transactions", ^{
     it(@"should return a new transaction", ^{
-      [[[Stack memoryStack].transaction(^{
-        
-      }) shouldNot] beNil];
+      NSManagedObjectContext *threadContext = [NSThread currentThread].threadDictionary[__stackThreadContextKey];
+      
+      Stack.memoryStack.transaction(^{
+        NSManagedObjectContext *transactionContext = [NSThread currentThread].threadDictionary[__stackThreadContextKey];
+        [[transactionContext shouldNot] beNil];
+        [[threadContext shouldNot] equal:transactionContext];
+      });
     });
   });
 

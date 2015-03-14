@@ -36,6 +36,8 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, copy) void (^transactionBlock)();
 @property (nonatomic, copy) void (^transactionCompletionBlock)();
+@property (nonatomic, copy) void (^saveSynchronously)();
+@property (nonatomic, copy) void (^saveAsynchronously)();
 @end
 
 
@@ -269,6 +271,25 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   return context;
 }
 
+#pragma mark - Deletes
+
+- (void (^)(NSArray *))deleteObjects
+{
+  return ^(NSArray *objects) {
+    for (id object in objects) {
+      SPXAssertTrueOrReturn([object isKindOfClass:[NSManagedObject class]]);
+      [self.currentThreadContext deleteObject:object];
+    }
+  };
+}
+
+- (void (^)(NSManagedObjectID *))deleteWhereObjectID
+{
+  return ^(NSManagedObjectID *objectID) {
+    [self.currentThreadContext deleteObject:[self.transactionContext objectWithID:objectID]];
+  };
+}
+
 #pragma mark - Queries
 
 - (NSString *(^)(__unsafe_unretained Class))entityNameForClass
@@ -318,7 +339,7 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
   [stack removeLastObject];
 }
 
-- (StackTransaction *(^)(void (^transactionBlock)()))transaction
+- (void (^)(void (^transactionBlock)()))transaction
 {  
   __weak typeof(self) weakInstance = self;
   return ^(void (^transactionBlock)()) {
@@ -329,8 +350,24 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
     };
     
     transaction.transactionBlock = transactionBlock;
-    return transaction;
+    transaction.saveSynchronously();
   };  
+}
+
+- (void (^)(void (^)(), void (^)()))asyncTransaction
+{
+  __weak typeof(self) weakInstance = self;
+  return ^(void (^transactionBlock)(), void (^completionBlock)()) {
+    StackTransaction *transaction = [weakInstance pushTransaction];
+    
+    transaction.transactionCompletionBlock = ^{
+      [weakInstance popTransaction];
+      !completionBlock ?: completionBlock();
+    };
+    
+    transaction.transactionBlock = transactionBlock;
+    transaction.saveAsynchronously();
+  };
 }
 
 @end

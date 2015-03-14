@@ -48,7 +48,7 @@ describe(@"StackQuery", ^{
         Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
         person.name = names[i];
       }
-    }).synchronous(YES);
+    });
     
     query = Stack.memoryStack.query(Person.class);
   });
@@ -132,25 +132,26 @@ describe(@"StackQuery", ^{
       [[className should] equal:NSStringFromClass(Person.class)];
     });
     
+    it(@"should return the first object", ^{
+      NSArray *sortedNames = [names sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES] ]];
+      Person *firstPerson = query.sortWithDescriptors(@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES] ]).firstObject();
+      [[firstPerson.name should] equal:sortedNames.firstObject];
+    });
+    
+    it(@"should return the last object", ^{
+      NSArray *sortedNames = [names sortedArrayUsingDescriptors:@[ [NSSortDescriptor sortDescriptorWithKey:@"self" ascending:YES] ]];
+      Person *lastPerson = query.sortWithDescriptors(@[ [NSSortDescriptor sortDescriptorWithKey:@"name" ascending:YES] ]).lastObject();
+      [[lastPerson.name should] equal:sortedNames.lastObject];
+    });
+    
     context(@"Deleting", ^{
       
       it(@"should delete all items", ^{
         Stack.memoryStack.transaction(^{
           query.delete();
-        }).synchronous(YES);
+        });
         
         [[theValue(query.count()) should] equal:theValue(0)];
-      });
-      
-      it(@"Should delete specific items", ^{
-        [[theValue(query.count()) should] equal:theValue(names.count)];
-        
-        Stack.memoryStack.transaction(^{
-          id object = query.whereIdentifier(@"1", NO);
-          query.deleteObjects(@[ object ]);
-        }).synchronous(YES);
-        
-        [[theValue(query.count()) should] equal:theValue(names.count - 1)];
       });
       
     });

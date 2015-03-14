@@ -69,9 +69,9 @@
   };
 }
 
-- (id (^)(NSString *, BOOL))whereIdentifier
+- (id (^)(id, BOOL))whereIdentifier
 {
-  return ^(NSString *identifier, BOOL createIfNil) {
+  return ^(id identifier, BOOL createIfNil) {
     NSUInteger limit = self.fetchRequest.fetchLimit;
     NSError *error = nil;
     
@@ -241,18 +241,6 @@
   };
 }
 
-- (void (^)(NSArray *))deleteObjects
-{
-  return ^(NSArray *objects) {
-    for (id object in objects) {
-      SPXAssertTrueOrReturn([object isKindOfClass:[NSManagedObject class]]);
-      [self.managedObjectContext deleteObject:object];
-    }
-    
-    [self resetFetchRequest];
-  };
-}
-
 - (NSArray *(^)())fetch
 {
   return ^{
@@ -265,6 +253,46 @@
     
     [self resetFetchRequest];
     return objects;
+  };
+}
+
+- (id (^)())firstObject
+{
+  return ^{
+    NSError *error = nil;
+    
+    self.fetchRequest.fetchOffset = 0;
+    self.fetchRequest.fetchBatchSize = 1;
+    
+    id object = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error].firstObject;
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    [self resetFetchRequest];
+    return object;
+  };
+}
+
+- (id (^)())lastObject
+{
+  return ^{
+    NSError *error = nil;
+    NSUInteger count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+    
+    self.fetchRequest.fetchOffset = count - 1;
+    self.fetchRequest.fetchBatchSize = 1;
+    
+    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    id object = objects.lastObject;
+    
+    if (error) {
+      SPXLog(@"%@", error);
+    }
+    
+    [self resetFetchRequest];
+    return object;
   };
 }
 

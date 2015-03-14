@@ -28,6 +28,16 @@
   [self updateObject:person withStack:stack];
   
   [self deleteObjectsWithQuery:query];
+  
+  stack.transaction(^{
+    
+  });
+  
+  stack.asyncTransaction(^{
+    
+  }, ^{
+    
+  });
 }
 
 - (void)deleteObjectsWithQuery:(StackQuery *)query
@@ -39,7 +49,6 @@
 - (void)createObjectsWithQuery:(StackQuery *)query stack:(Stack *)stack
 {
   for (int i = 0; i < 100; i++) {
-
     stack.transaction(^{
       stack.query(Person.class).whereIdentifiers(@[ @"", @"", @"" ], YES);
       
@@ -47,7 +56,7 @@
       Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);
       person.name = @"Shaps";
       
-    }).synchronous(YES);
+    });
   }
   
   NSLog(@"%zd", query.count());
@@ -60,7 +69,7 @@
   stack.transaction(^{
     @stack_copy(person);
     person.name = @"Mohsenin";
-  }).synchronous(YES);
+  });
   
   NSLog(@"After: %@", [stack.query(person.class).fetch().firstObject name]);
 }

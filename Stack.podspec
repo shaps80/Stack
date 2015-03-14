@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "Stack"
-  s.version          = "0.2.4"
+  s.version          = "0.3.0"
   s.summary          = "A fresh, safer approach to CoreData"
   s.description      = <<-DESC
                        Stack provides a safer implementation for working with CoreData

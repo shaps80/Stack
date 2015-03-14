@@ -24,6 +24,7 @@
  */
 
 #import <CoreData/CoreData.h>
+#import "SPXDefines.h"
 
 
 /**
@@ -98,29 +99,11 @@
 
 
 /**
- *  Deletes the specified objects from this query
- */
-@property (nonatomic, readonly) void (^deleteObjects)(NSArray *objects);
-
-
-/**
- *  Returns the number of objects that would be returned for this query. This will not fetch the objects themselves.
- */
-@property (nonatomic, readonly) NSUInteger (^count)();
-
-
-/**
- *  Performs the query and returns the results
- */
-@property (nonatomic, readonly) NSArray *(^fetch)();
-
-
-/**
  *  Returns the object for the specified identifier. If createIfNil == YES and the identifier doesn't exist, the object will be created.
  *  @param identifier   The identifier of the object to return
  *  @param createIfNil  If YES, creates the object where it doesn't exist. If NO, the object will not be created, instead nil will be returned
  */
-@property (nonatomic, readonly) id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
+@property (nonatomic, readonly) id (^whereIdentifier)(id identifier, BOOL createIfNil);
 
 
 /**
@@ -137,6 +120,35 @@
 @property (nonatomic, readonly) id (^whereObjectID)(NSManagedObjectID *objectID);
 
 
+/**
+ *  Returns the number of objects that would be returned for this query. This will not fetch the objects themselves.
+ */
+@property (nonatomic, readonly) NSUInteger (^count)();
+
+
+/**
+ *  Performs the query and returns the results
+ */
+@property (nonatomic, readonly) NSArray *(^fetch)();
+
+
+/**
+ *  Returns the first item from the results. Sort descriptors and predicates will be process first. (this is an optimised call)
+ */
+@property (nonatomic, readonly) id (^firstObject)();
+
+
+/**
+ *  Returns the last item from the results. Sort descriptors and predicates will be process first. (this is an optimised call)
+ */
+@property (nonatomic, readonly) id (^lastObject)();
+
+
+@end
+
+
+@interface StackQuery (Deprecated)
+@property (nonatomic, readonly) void (^deleteObjects)(NSArray *objects) SPX_DEPRECATED("Object deletion methods have been moved to Stack.h");
 @end
 
 

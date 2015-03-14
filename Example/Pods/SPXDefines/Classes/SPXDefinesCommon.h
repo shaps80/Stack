@@ -49,4 +49,7 @@ static inline BOOL isMetaClass(id objOrClass)
 }
 
 
+#define SPX_DEPRECATED(msg) __attribute__((deprecated(msg)))
+
+
 #endif

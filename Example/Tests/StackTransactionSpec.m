@@ -45,7 +45,7 @@ describe(@"StackTransaction", ^{
         Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
         person.name = names[i];
       }
-    }).synchronous(YES);
+    });
     
     query = Stack.memoryStack.query(Person.class);
   });
@@ -61,7 +61,7 @@ describe(@"StackTransaction", ^{
       
       stack.transaction(^{
         count = query.count();
-      }).synchronous(NO);
+      });
       
       [[theValue(count) should] equal:theValue(names.count)];
     });
@@ -69,9 +69,9 @@ describe(@"StackTransaction", ^{
     it(@"should perform an asynchronous operation", ^{
       __block NSUInteger count = 0;
       
-      stack.transaction(^{
+      stack.asyncTransaction(^{
         count = query.count();
-      }).asynchronous(NO, ^{
+      }, ^{
         [[theValue(count) should] equal:theValue(names.count)];
       });
       
@@ -85,10 +85,16 @@ describe(@"StackTransaction", ^{
     it(@"context should see updates from another thread", ^{
       __block Person *person = query.whereIdentifier(@"0", NO);
       
-      stack.transaction(^{
+      stack.asyncTransaction(^{
+        
+      }, ^{
+        
+      });
+      
+      stack.asyncTransaction(^{
         @stack_copy(person);
         person.name = @"Jeff";
-      }).asynchronous(YES, ^{
+      }, ^{
         person = query.whereIdentifier(@"0", NO);
         [[person.name should] equal:@"Jeff"];
       });
@@ -98,13 +104,12 @@ describe(@"StackTransaction", ^{
       __block Person *person = query.whereIdentifier(@"0", NO);
       __block NSManagedObjectContext *context1 = nil, *context2 = nil;
       
-      stack.transaction(^{
+      stack.asyncTransaction(^{
         @stack_copy(person);
         context1 = person.managedObjectContext;
-      }).asynchronous(YES, ^{
+      }, ^{
         person = query.whereIdentifier(@"0", NO);
         context2 = person.managedObjectContext;
-        
         [[context1 shouldNot] equal:context2];
       });
     });
@@ -113,13 +118,12 @@ describe(@"StackTransaction", ^{
       __block Person *person = query.whereIdentifier(@"0", NO);
       __block NSManagedObjectContext *context1 = nil, *context2 = nil;
       
-      stack.transaction(^{
+      stack.asyncTransaction(^{
         @stack_copy(person);
         context1 = person.managedObjectContext;
-      }).asynchronous(YES, ^{
+      }, ^{
         person = query.whereIdentifier(@"0", NO);
         context2 = person.managedObjectContext;
-        
         [[context1.parentContext should] equal:context2.parentContext];
       });
     });
@@ -138,11 +142,11 @@ describe(@"StackTransaction", ^{
       __block Person *person = query.whereIdentifier(@"0", NO);
       __block NSManagedObjectContext *context1 = nil, *context2 = nil;
       
-      stack.transaction(^{
+      stack.asyncTransaction(^{
         context1 = person.managedObjectContext;
         context2 = [NSThread currentThread].threadDictionary[__stackThreadContextKey];
         [[context1 shouldNot] equal:context2];
-      }).synchronous(YES);
+      }, nil);
     });
     
   });

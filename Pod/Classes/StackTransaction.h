@@ -24,6 +24,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import "SPXDefines.h"
 
 @class StackTransaction;
 
@@ -31,19 +32,12 @@
 /**
  *  A transaction object is responsible for managing an NSManagedObjectContext. It provides a level of abstraction to make CoreData safer to implement.
  */
-@interface StackTransaction : NSObject
+@interface StackTransaction : NSObject @end
 
 
-/**
- *  Saves all changes inside the transaction synchronously
- */
-@property (nonatomic, readonly) void(^synchronous)(BOOL save);
+@interface StackTransaction (Deprecated)
 
-
-/**
- *  Saves all changes inside the transaction asynchronously. Optionally you can provide a completion block to execute when the transaction completes. The completion block is guaranteed to execute on the same thread as the transaction.
- */
-@property (nonatomic, readonly) void(^asynchronous)(BOOL save, void (^completion)());
-
+@property (nonatomic, readonly) void(^synchronous)(BOOL save) SPX_DEPRECATED("Use -transaction on your stack object");
+@property (nonatomic, readonly) void(^asynchronous)(BOOL save, void (^completion)()) SPX_DEPRECATED("Use -asyncTransaction on your stack object");
 
 @end

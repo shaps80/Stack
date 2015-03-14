@@ -34,12 +34,19 @@
 @interface Stack : NSObject
 
 
+#pragma mark - Queries
+
+
 /**
- *  A transaction can be used to batch mutliple queries, improving performance in some cases. Can be nested and called reentrantly
- *
- *  @note Thanks to Nick Lockwood for the solution around this approach
+ *  Performs a synchronous transaction, should be used for all insert/update/delete operations. Transactions are persisted implicitly. Can be nested and called reentrantly.
  */
-@property (nonatomic, readonly) StackTransaction* (^transaction)(void (^transactionBlock)());
+@property (nonatomic, readonly) void (^transaction)(void (^transactionBlock)());
+
+
+/**
+ *  Performs a asynchronous transaction, should be used for all insert/update/delete operations. Transactions are persisted implicitly. Can be nested and called reentrantly.
+ */
+@property (nonatomic, readonly) void (^asyncTransaction)(void (^transactionBlock)(), void (^completionBlock)());
 
 
 /**
@@ -54,6 +61,24 @@
  *  Returns the entity name for the specified NSManagedObjectClass in this stack.
  */
 @property (nonatomic, readonly) NSString* (^entityNameForClass)(Class managedObjectClass);
+
+
+#pragma mark - Deletes
+
+
+/**
+ *  Deletes the specified objects from the model
+ */
+@property (nonatomic, readonly) void (^deleteObjects)(NSArray *objects);
+
+
+/**
+ *  Deletes the object with the specified NSManagedObjectID
+ */
+@property (nonatomic, readonly) void (^deleteWhereObjectID)(NSManagedObjectID *objectID);
+
+
+#pragma mark - Stacks
 
 
 /**
