@@ -28,6 +28,9 @@ This is an idea or concept for how I wish CoreData worked out of the box. I'm re
 * Transaction blocks -- supporting nesting, siblings and reentrancy
 * @stack_copy(...) convenience macro for passing objects across threads -- my fave feature!
 * NSFetchedResultsController convenience method for creating them for you
+* Optimised find or create for multiple results!
+* Optimised queries for first/last object -- after predicate and sorting is applied
+* Transactions now save implicitly
 
 ## Safer
 
@@ -48,7 +51,7 @@ Stack *stack = [Stack defaultStack];
       @stack_copy(person);
       person.name = @"Anne";
       
-    }).synchronous(YES); // person.name is safely updated
+    }); // person.name is safely updated
   });
 ```
 
@@ -131,6 +134,8 @@ Stack makes this easy by providing a simple interface compared to most other imp
 @property ... NSArray *(^fetch)();
 @property ... id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
 @property ... NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
+@property ... id (^firstObject)();
+@property ... id (^lastObject)();
 ```
 
 Notice most of the implementations return an instance of `StackQuery`, allowing you to chain in any combination. 
@@ -167,7 +172,7 @@ Sometimes however you need to `read` on one thread but want to `write` on anothe
 ```objc
 @stack_copy(...)
 @stack_copy(people)
-@stack_copy(person1, person2)
+@stack_copy(person1, people)
 ```
 
 This allows you to copy an array, a single object, or some variation since the macro uses variadic arguments.
