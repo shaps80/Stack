@@ -10,7 +10,9 @@
 #import "Stack.h"
 #import "Person.h"
 
+
 @interface StackViewController ()
+
 @end
 
 @implementation StackViewController
@@ -22,22 +24,7 @@
   Stack *stack = [Stack memoryStack];
   StackQuery *query = stack.query(Person.class);
   
-  [self createObjectsWithQuery:query stack:stack];
-  
-  Person *person = query.fetch().firstObject;
-  [self updateObject:person withStack:stack];
-  
   [self deleteObjectsWithQuery:query];
-  
-  stack.transaction(^{
-    
-  });
-  
-  stack.asyncTransaction(^{
-    
-  }, ^{
-    
-  });
 }
 
 - (void)deleteObjectsWithQuery:(StackQuery *)query

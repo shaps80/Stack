@@ -33,7 +33,6 @@
  */
 @interface Stack : NSObject
 
-
 #pragma mark - Queries
 
 

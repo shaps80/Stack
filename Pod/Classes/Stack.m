@@ -196,6 +196,10 @@ NSString *const __stackTransactionKey = @"__stackTransactionKey";
 
 + (void)handleError:(NSError *)error
 {
+  if (!error) {
+    return;
+  }
+  
   for (NSArray *detailedError in error.userInfo.allValues) {
     if ([detailedError isKindOfClass:[NSArray class]]) {
       for (NSError *err in detailedError) {

@@ -144,16 +144,20 @@ describe(@"StackQuery", ^{
       [[lastPerson.name should] equal:sortedNames.lastObject];
     });
     
-    context(@"Deleting", ^{
-      
-      it(@"should delete all items", ^{
-        Stack.memoryStack.transaction(^{
-          query.delete();
-        });
-        
-        [[theValue(query.count()) should] equal:theValue(0)];
+    it(@"should return with (fault == NO)", ^{
+      [[theValue(query.fetchRequest.returnsDistinctResults) should] equal:theValue(NO)];
+    });
+    
+  });
+  
+  context(@"Deleting", ^{
+    
+    it(@"should delete all items", ^{
+      Stack.memoryStack.transaction(^{
+        query.delete();
       });
       
+      [[theValue(query.count()) should] equal:theValue(0)];
     });
     
   });
@@ -161,19 +165,18 @@ describe(@"StackQuery", ^{
   context(@"Identifiers", ^{
     
     it(@"should find 1 match", ^{
-      query.whereIdentifier(@"0", NO);
-      [[theValue(query.count()) should] equal:@1];
+      Person *person = query.whereIdentifier(@"0", NO);
+      [[person shouldNot] beNil];
     });
     
     it(@"should find 0 matches", ^{
-      query.whereIdentifier(@"99", NO);
-      [[theValue(query.count()) should] equal:@0];
+      Person *person = query.whereIdentifier(@"99", NO);
+      [[person should] beNil];
     });
     
     it(@"should find create a new record", ^{
-      query.whereIdentifier(@"99", YES);
-      query.wherePredicate(nil);
-      [[theValue(query.count()) should] equal:theValue(names.count + 1)];
+      Person *person = query.whereIdentifier(@"99", YES);
+      [[person shouldNot] beNil];
     });
     
     it(@"should find 3 matches", ^{
@@ -182,9 +185,8 @@ describe(@"StackQuery", ^{
     });
     
     it(@"should create 1 new record", ^{
-      query.whereIdentifiers(@[ @"0", @"1", @"2", @"99" ], YES);
-      query.wherePredicate(nil);
-      [[theValue(query.count()) should] equal:theValue(names.count + 1)];
+      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2", @"99" ], YES);
+      [[theValue(objects.count) should] equal:theValue(4)];
     });
     
     it(@"should return an object with the specified objectID", ^{
@@ -192,6 +194,7 @@ describe(@"StackQuery", ^{
       
       Stack.memoryStack.transaction(^{
         Person *p = query.whereObjectID(person.objectID);
+        [[p.managedObjectContext shouldNot] equal:person.managedObjectContext];
         [[p.objectID should] equal:person.objectID];
         [[p.name should] equal:person.name];
       });

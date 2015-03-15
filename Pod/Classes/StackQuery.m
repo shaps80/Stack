@@ -31,6 +31,7 @@
 @interface Stack (Private)
 @property (nonatomic, readonly) NSManagedObjectContext *mainThreadContext;
 @property (nonatomic, readonly) NSManagedObjectContext *currentThreadContext;
++ (void)handleError:(NSError *)error;
 @end
 
 @interface StackTransaction (Private)
@@ -41,6 +42,7 @@
 @property (nonatomic, weak) Stack *stack;
 @property (nonatomic, assign) Class managedObjectClass;
 @property (nonatomic, strong) NSFetchRequest *fetchRequest;
+@property (nonatomic, strong) NSString *entityName;
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @end
 
@@ -50,7 +52,7 @@
 {
   StackQuery *query = [StackQuery new];
   query.managedObjectClass = managedObjectClass;
-  query.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+  query.entityName = entityName;
   return query;
 }
 
@@ -63,8 +65,13 @@
 {
   return ^(NSString *sectionNameKeyPath, id <NSFetchedResultsControllerDelegate> delegate) {
     SPXCAssertTrueOrPerformAction([NSThread isMainThread], return (NSFetchedResultsController *)nil);
-    NSFetchedResultsController *controller = [[NSFetchedResultsController alloc] initWithFetchRequest:self.fetchRequest managedObjectContext:self.stack.mainThreadContext sectionNameKeyPath:sectionNameKeyPath cacheName:nil];
-    controller.delegate = delegate;
+    __block NSFetchedResultsController *controller = nil;
+    
+    [self.managedObjectContext performBlockAndWait:^{
+      controller = [[NSFetchedResultsController alloc] initWithFetchRequest:self.fetchRequest managedObjectContext:self.stack.mainThreadContext sectionNameKeyPath:sectionNameKeyPath cacheName:nil];
+      controller.delegate = delegate;
+    }];
+    
     return controller;
   };
 }
@@ -73,17 +80,12 @@
 {
   return ^(id identifier, BOOL createIfNil) {
     NSUInteger limit = self.fetchRequest.fetchLimit;
-    NSError *error = nil;
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", [self.managedObjectClass identifierKey], identifier];
     self.fetchRequest.predicate = predicate;
     self.fetchRequest.fetchLimit = 1;
     
-    NSArray *results = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
-    
-    if (error) {
-      SPXLog(@"%@", error);
-    }
+    NSArray *results = [self executeFetchRequest];
     
     if (results.count || !createIfNil) {
       self.fetchRequest.fetchLimit = limit;
@@ -93,7 +95,6 @@
     id object = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
     [object setValue:identifier forKey:[self.managedObjectClass identifierKey]];
     
-    [self resetFetchRequest];
     return object;
   };
 }
@@ -101,18 +102,13 @@
 - (NSArray *(^)(NSArray *, BOOL))whereIdentifiers
 {
   return ^(NSArray *identifiers, BOOL createIfNil) {
-    NSError *error = nil;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K IN %@", [self.managedObjectClass identifierKey], identifiers];
     self.fetchRequest.predicate = predicate;
     
-    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
-    
-    if (error) {
-      SPXLog(@"%@", error);
-    }
+    NSArray *objects = [self executeFetchRequest];
     
     if (objects.count == identifiers.count || !createIfNil) {
-      [self resetFetchRequest];
+      self.fetchRequest = nil;
       return objects;
     }
     
@@ -131,7 +127,6 @@
     }
     
     objects = [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
-    [self resetFetchRequest];
     
     return objects;
   };
@@ -183,7 +178,8 @@
 - (StackQuery *(^)())faultFilled
 {
   return ^{
-    self.fetchRequest.returnsObjectsAsFaults = NO;
+    self.fetchRequest.resultType = NSManagedObjectResultType;
+    [self.fetchRequest setReturnsObjectsAsFaults:NO];
     return self;
   };
 }
@@ -215,14 +211,15 @@
 - (NSUInteger (^)())count
 {
   return ^{
-    __block NSError *error = nil;
-    __block NSUInteger count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+    __block NSUInteger count = 0;
     
-    if (error) {
-      SPXLog(@"%@", error);
-    }
+    [self.managedObjectContext performBlockAndWait:^{
+      __block NSError *error = nil;
+      count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+      [Stack handleError:error];
+    }];
     
-    [self resetFetchRequest];
+    self.fetchRequest = nil;
     return count;
   };
 }
@@ -230,75 +227,70 @@
 - (void (^)())delete
 {
   return ^{
-    __block NSError *error = nil;
-    __block NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    __block NSArray *objects = [self executeFetchRequest];
     
-    for (id object in objects) {
-      [self.managedObjectContext deleteObject:object];
-    }
-    
-    [self resetFetchRequest];
+    [self.managedObjectContext performBlockAndWait:^{
+      for (id object in objects) {
+        [self.managedObjectContext deleteObject:object];
+      }
+    }];
   };
 }
 
 - (NSArray *(^)())fetch
 {
   return ^{
-    NSError *error = nil;
-    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
-    
-    if (error) {
-      SPXLog(@"%@", error);
-    }
-    
-    [self resetFetchRequest];
-    return objects;
+    return [self executeFetchRequest];
   };
 }
 
 - (id (^)())firstObject
 {
   return ^{
-    NSError *error = nil;
-    
     self.fetchRequest.fetchOffset = 0;
     self.fetchRequest.fetchBatchSize = 1;
-    
-    id object = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error].firstObject;
-    
-    if (error) {
-      SPXLog(@"%@", error);
-    }
-    
-    [self resetFetchRequest];
-    return object;
+    return [self executeFetchRequest].firstObject;
   };
 }
 
 - (id (^)())lastObject
 {
   return ^{
-    NSError *error = nil;
-    NSUInteger count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+    __block NSUInteger count = 0;
+    
+    [self.managedObjectContext performBlockAndWait:^{
+      NSError *error = nil;
+      count = [self.managedObjectContext countForFetchRequest:self.fetchRequest error:&error];
+      [Stack handleError:error];
+    }];
     
     self.fetchRequest.fetchOffset = count - 1;
     self.fetchRequest.fetchBatchSize = 1;
     
-    NSArray *objects = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
-    id object = objects.lastObject;
-    
-    if (error) {
-      SPXLog(@"%@", error);
-    }
-    
-    [self resetFetchRequest];
-    return object;
+    return [self executeFetchRequest].lastObject;
   };
 }
 
-- (void)resetFetchRequest
+- (NSArray *)executeFetchRequest
 {
-  self.fetchRequest = [NSFetchRequest fetchRequestWithEntityName:self.fetchRequest.entityName];
+  __block NSArray *results = nil;
+  
+  [self.managedObjectContext performBlockAndWait:^{
+    NSError *error = nil;
+    results = [self.managedObjectContext executeFetchRequest:self.fetchRequest error:&error];
+    [Stack handleError:error];
+  }];
+  
+  self.fetchRequest = nil;
+  return results;
+}
+
+- (NSFetchRequest *)fetchRequest
+{
+  return _fetchRequest ?: ({
+    NSFetchRequest *request = [[NSFetchRequest alloc] initWithEntityName:self.entityName];
+    _fetchRequest = request;
+  });
 }
 
 - (NSString *)description
