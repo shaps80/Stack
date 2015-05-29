@@ -88,7 +88,7 @@
 
 
 /**
- *  Returns the default stack configuration. This implementation uses a parent-child based stack. The defaultStack is loaded into memory only.
+ *  Returns the default stack configuration. This implementation uses a parent-child based stack. The memoryStack is loaded into memory only.
  *  @return A shared in-memory instance
  */
 + (instancetype)memoryStack;

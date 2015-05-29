@@ -35,8 +35,14 @@
 
 - (void)createObjectsWithQuery:(StackQuery *)query stack:(Stack *)stack
 {
+  StackQuery *q = Stack.defaultStack.query(Person.class);
+  NSArray *people = q.fetch();
+  
   for (int i = 0; i < 100; i++) {
     stack.transaction(^{
+      @stack_copy(people);
+      
+      [people firstObject];
       stack.query(Person.class).whereIdentifiers(@[ @"", @"", @"" ], YES);
       
       NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];

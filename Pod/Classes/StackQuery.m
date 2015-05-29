@@ -249,6 +249,7 @@
   return ^{
     self.fetchRequest.fetchOffset = 0;
     self.fetchRequest.fetchBatchSize = 1;
+    self.fetchRequest.fetchLimit = 1;
     return [self executeFetchRequest].firstObject;
   };
 }
@@ -266,6 +267,7 @@
     
     self.fetchRequest.fetchOffset = count - 1;
     self.fetchRequest.fetchBatchSize = 1;
+    self.fetchRequest.fetchLimit = 1;
     
     return [self executeFetchRequest].lastObject;
   };
