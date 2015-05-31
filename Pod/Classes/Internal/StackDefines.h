@@ -26,6 +26,7 @@
 #ifndef __STACK_DEFINES_H
 #define __STACK_DEFINES_H
 
+@import Foundation;
 #import "metamacros.h"
 
 extern NSString *const __stackThreadContextKey;
