@@ -1,0 +1,20 @@
+PODS:
+  - Kiwi (2.3.1)
+  - SPXDefines (1.2.4)
+  - Stack (0.5.0):
+    - SPXDefines
+
+DEPENDENCIES:
+  - Kiwi
+  - Stack (from `../`)
+
+EXTERNAL SOURCES:
+  Stack:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Kiwi: f038a6c61f7a9e4d7766bff5717aa3b3fdb75f55
+  SPXDefines: 264a8381a08080532d52b041559a6c32af19377b
+  Stack: 4c011671416837ee34a1082c92c742171c468a51
+
+COCOAPODS: 0.37.2
