@@ -21,7 +21,7 @@
   StackQuery *query = stack.query(Person.class);
   
   [self createObjectsWithQuery:query];
-//  [self deleteObjectsWithQuery:query];
+//  [.self deleteObjectsWithQuery:query];
 }
 
 - (void)deleteObjectsWithQuery:(StackQuery *)query
@@ -50,9 +50,9 @@
 {
   NSLog(@"Before: %@", person.name);
   
-//  stack_prepare(person);
+  stack_prepare(person);
   stack.transaction(^{
-//    stack_copy(person);
+    stack_copy(person);
     person.name = @"Mohsenin";
   });
   
