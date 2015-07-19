@@ -112,13 +112,15 @@ NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcur
 
 ## NSFetchedResultsController
 
-You can easily create a NSFetchedResultsController from any query in Stack.
+You can also create a NSFetchedResultsController from any query in Stack.
 
 ```objc
-controller = stack.query(Account.class).sortByKey(@"email", YES).fetchedResultsController(section, delegate);
+controller = stack.query(Account.class).groupBy(@"role").sortBy(@"name").fetchedResultsController();
 ```
 
 Stack will automatically setup the context and fetch request for you.
+
+> Note: the groupBy() call is optional and only required if you want sectioning.
 
 ## Interface
 
