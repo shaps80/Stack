@@ -45,7 +45,7 @@ describe(@"StackQuery", ^{
     Stack.memoryStack.transaction(^{
       for (NSUInteger i = 0; i < names.count; i++) {
         NSString *identifier = [NSString stringWithFormat:@"%zd", i];
-        Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
+        Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier).fetchOrCreate();
         person.name = names[i];
       }
     });
@@ -123,7 +123,8 @@ describe(@"StackQuery", ^{
     });
     
     it(@"should return (names.count) results", ^{
-      [[theValue(query.fetch().count) should] equal:theValue(names.count)];
+      NSArray *objects = query.fetch();
+      [[theValue(objects.count) should] equal:theValue(names.count)];
     });
     
     it(@"should return Person objects", ^{
@@ -165,32 +166,32 @@ describe(@"StackQuery", ^{
   context(@"Identifiers", ^{
     
     it(@"should find 1 match", ^{
-      Person *person = query.whereIdentifier(@"0", NO);
+      Person *person = query.whereIdentifier(@"0").fetch();
       [[person shouldNot] beNil];
     });
     
     it(@"should find 0 matches", ^{
-      Person *person = query.whereIdentifier(@"99", NO);
+      Person *person = query.whereIdentifier(@"99").fetch();
       [[person should] beNil];
     });
     
     it(@"should find create a new record", ^{
-      Person *person = query.whereIdentifier(@"99", YES);
+      Person *person = query.whereIdentifier(@"99").fetchOrCreate();
       [[person shouldNot] beNil];
     });
     
     it(@"should find 3 matches", ^{
-      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2" ], NO);
+      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2" ]).fetch();
       [[theValue(objects.count) should] equal:theValue(3)];
     });
     
     it(@"should create 1 new record", ^{
-      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2", @"99" ], YES);
+      NSArray *objects = query.whereIdentifiers(@[ @"0", @"1", @"2", @"99" ]).fetchOrCreate();
       [[theValue(objects.count) should] equal:theValue(4)];
     });
     
     it(@"should return an object with the specified objectID", ^{
-      Person *person = query.whereIdentifier(@"1", NO);
+      Person *person = query.whereIdentifier(@"1").fetch();
       
       Stack.memoryStack.transaction(^{
         Person *p = query.whereObjectID(person.objectID);

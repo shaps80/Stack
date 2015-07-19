@@ -11,10 +11,6 @@
 #import "Person.h"
 
 
-@interface StackViewController ()
-
-@end
-
 @implementation StackViewController
 
 - (void)viewDidLoad
@@ -24,7 +20,8 @@
   Stack *stack = [Stack memoryStack];
   StackQuery *query = stack.query(Person.class);
   
-  [self deleteObjectsWithQuery:query];
+  [self createObjectsWithQuery:query];
+//  [self deleteObjectsWithQuery:query];
 }
 
 - (void)deleteObjectsWithQuery:(StackQuery *)query
@@ -33,22 +30,16 @@
   NSLog(@"%zd", query.count());
 }
 
-- (void)createObjectsWithQuery:(StackQuery *)query stack:(Stack *)stack
+- (void)createObjectsWithQuery:(StackQuery *)query
 {
-  StackQuery *q = Stack.defaultStack.query(Person.class);
-  NSArray *people = q.fetch();
+  NSArray *people = query.fetch();
+  Person *person = query.whereIdentifier(@"124").fetchOrCreate();
   
+  stack_prepare(people, person);
   for (int i = 0; i < 100; i++) {
-    stack.transaction(^{
-      @stack_copy(people);
-      
-      [people firstObject];
-      stack.query(Person.class).whereIdentifiers(@[ @"", @"", @"" ], YES);
-      
-      NSString *identifier = [NSString stringWithFormat:@"id-%zd", i];
-      Person *person = stack.query(Person.class).whereIdentifier(identifier, YES);
+    query.stack.transaction(^{
+      stack_copy(people, person);
       person.name = @"Shaps";
-      
     });
   }
   
@@ -59,12 +50,13 @@
 {
   NSLog(@"Before: %@", person.name);
   
+//  stack_prepare(person);
   stack.transaction(^{
-    @stack_copy(person);
+//    stack_copy(person);
     person.name = @"Mohsenin";
   });
   
-  NSLog(@"After: %@", [stack.query(person.class).fetch().firstObject name]);
+  NSLog(@"After: %@", [stack.query(person.class).fetch() name]);
 }
 
 @end

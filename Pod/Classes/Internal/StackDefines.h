@@ -33,19 +33,30 @@ extern NSString *const __stackThreadContextKey;
 
 
 /**
- * Creates \c __weak shadow variables for each of the variables provided as
- * arguments, which can later be made strong again with #strongify.
- *
- * This is typically used to weakly reference variables in a block, but then
- * ensure that the variables stay alive during the actual execution of the block
- * (if they were live upon entry).
- *
- * See #strongify for an example of usage.
+ * Creates \c local shadow variables for each of the variables provided as arguments, which can later be made strong again with stack_copy(...)
+ */
+#define stack_prepare(...) \
+metamacro_foreach_cxt(_stack_prepare,, _stack_, __VA_ARGS__)
+
+
+
+
+/**
+ * Imports the local shadow copies into the current NSManagedObjectContext
  */
 #define stack_copy(...) \
-_stack_keywordify \
-metamacro_foreach_cxt(_stack_copy,, _ID, __VA_ARGS__)
+_Pragma("clang diagnostic push") \
+_Pragma("clang diagnostic ignored \"-Wshadow\"") \
+metamacro_foreach_cxt(_stack_copy,, _stack_, __VA_ARGS__) \
+_Pragma("clang diagnostic pop") \
 
+
+/**
+ *  Fetches the objects into the current threads context to remove thread-safety issues
+ *  @note The excess casting is just to remove compiler warnings since we don't know if we're getting an array or individual objects
+ */
+#define _stack_prepare(INDEX, CONTEXT, VAR) \
+__typeof__(VAR) metamacro_concat(CONTEXT, VAR) = VAR;
 
 
 /**
@@ -53,40 +64,22 @@ metamacro_foreach_cxt(_stack_copy,, _ID, __VA_ARGS__)
  *  @note The excess casting is just to remove compiler warnings since we don't know if we're getting an array or individual objects
  */
 #define _stack_copy(INDEX, CONTEXT, VAR) \
-id metamacro_concat(VAR, CONTEXT) = [VAR valueForKey:@"objectID"]; \
-__typeof__(VAR) VAR = nil; \
+__typeof__(metamacro_concat(CONTEXT, VAR)) VAR = nil; \
+id metamacro_concat(_stack_object_, VAR) = [metamacro_concat(CONTEXT, VAR) valueForKey:@"objectID"]; \
 \
-if ([metamacro_concat(VAR, CONTEXT) isKindOfClass:[NSArray class]]) { \
-  NSMutableArray *_objects = [NSMutableArray new]; \
+if ([metamacro_concat(_stack_object_, VAR) isKindOfClass:[NSArray class]]) { \
+  NSMutableArray *_stack_objects = [NSMutableArray new]; \
   \
-  for (NSManagedObjectID *objectID in metamacro_concat(VAR, CONTEXT)) { \
-    [_objects addObject:[NSThread.currentThread.threadDictionary[__stackThreadContextKey] objectWithID:objectID]]; \
+  for (NSManagedObjectID *objectID in metamacro_concat(_stack_object_, VAR)) { \
+    [_stack_objects addObject:[NSThread.currentThread.threadDictionary[__stackThreadContextKey] objectWithID:objectID]]; \
   } \
   \
-  VAR = _objects.copy; \
+  VAR = _stack_objects.copy; \
 } \
 \
-if ([metamacro_concat(VAR, CONTEXT) isKindOfClass:[NSManagedObjectID class]]) { \
-  VAR = (__typeof__(VAR))[NSThread.currentThread.threadDictionary[__stackThreadContextKey] objectWithID:metamacro_concat(VAR, CONTEXT)]; \
+if ([metamacro_concat(_stack_object_, VAR) isKindOfClass:[NSManagedObjectID class]]) { \
+  VAR = (__typeof__(metamacro_concat(CONTEXT, VAR)))[NSThread.currentThread.threadDictionary[__stackThreadContextKey] objectWithID:metamacro_concat(_stack_object_, VAR)]; \
 } \
-
-
-// Details about the choice of backing keyword:
-//
-// The use of @try/@catch/@finally can cause the compiler to suppress
-// return-type warnings.
-// The use of @autoreleasepool {} is not optimized away by the compiler,
-// resulting in superfluous creation of autorelease pools.
-//
-// Since neither option is perfect, and with no other alternatives, the
-// compromise is to use @autorelease in DEBUG builds to maintain compiler
-// analysis, and to use @try/@catch otherwise to avoid insertion of unnecessary
-// autorelease pools.
-#if DEBUG
-#define _stack_keywordify autoreleasepool {}
-#else
-#define _stack_keywordify try {} @catch (...) {}
-#endif
 
 
 #endif

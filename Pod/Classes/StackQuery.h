@@ -26,11 +26,19 @@
 #import <CoreData/CoreData.h>
 #import "SPXDefines.h"
 
+@class Stack;
+
 
 /**
  *  A StackQuery instance is used for querying CoreData entities
  */
 @interface StackQuery : NSObject
+
+
+/**
+ *  Returns the stack this query is associated with
+ */
+@property (nonatomic, weak, readonly) Stack *stack;
 
 
 /**
@@ -103,7 +111,7 @@
  *  @param identifier   The identifier of the object to return
  *  @param createIfNil  If YES, creates the object where it doesn't exist. If NO, the object will not be created, instead nil will be returned
  */
-@property (nonatomic, readonly) id (^whereIdentifier)(id identifier, BOOL createIfNil);
+@property (nonatomic, readonly) StackQuery* (^whereIdentifier)(id identifier);
 
 
 /**
@@ -111,7 +119,7 @@
  *  @param identifier   The identifier of the objects to return
  *  @param createIfNil  If YES, creates the objects where they don't exist. If NO, the objects will not be created. If no objects are found or create, nil will be returned
  */
-@property (nonatomic, readonly) NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
+@property (nonatomic, readonly) StackQuery* (^whereIdentifiers)(NSArray *identifiers);
 
 
 /* 
@@ -129,7 +137,13 @@
 /**
  *  Performs the query and returns the results
  */
-@property (nonatomic, readonly) NSArray *(^fetch)();
+@property (nonatomic, readonly) id (^fetch)();
+
+
+/**
+ *  Fetches the associated objects, or creates them if possible. Note
+ */
+@property (nonatomic, readonly) id (^fetchOrCreate)();
 
 
 /**

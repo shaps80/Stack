@@ -73,7 +73,7 @@ describe(@"Stack", ^{
       stack.transaction(^{
         for (NSUInteger i = 0; i < names.count; i++) {
           NSString *identifier = [NSString stringWithFormat:@"%zd", i];
-          Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier, YES);
+          Person *person = Stack.memoryStack.query(Person.class).whereIdentifier(identifier).fetchOrCreate();
           person.name = names[i];
         }
       });
@@ -89,7 +89,7 @@ describe(@"Stack", ^{
       [[theValue(query.count()) should] equal:theValue(names.count)];
       
       stack.transaction(^{
-        id object = query.whereIdentifier(@"1", NO);
+        id object = query.whereIdentifier(@"1").fetch();
         stack.deleteObjects(@[ object ]);
       });
       

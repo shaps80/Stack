@@ -26,7 +26,7 @@ This is an idea or concept for how I wish CoreData worked out of the box. I'm re
 * Clean block based API
 * Chain based API allowing you to chain multiple commands together
 * Transaction blocks -- supporting nesting, siblings and reentrancy
-* @stack_copy(...) convenience macro for passing objects across threads -- my fave feature!
+* `stack_prepare(...)` & `stack_copy(...)` convenience macro for passing objects across threads -- my fave feature!
 * NSFetchedResultsController convenience method for creating them for you
 * Optimised find or create for multiple results!
 * Optimised queries for first/last object -- after predicate and sorting is applied
@@ -36,7 +36,7 @@ This is an idea or concept for how I wish CoreData worked out of the box. I'm re
 
 I am not someone who typically likes to abstract away too many details but with simple and common CoreData configurations, understanding the context, threading and other issues just seemed crazy to me.
 
-With Stack, you can use a transaction block at anytime to make changes safely. In fact if you have an object from another context/thread you can safely update that too using the Stack macro `@stack_copy(...)` which takes multiple arguments so you can pass an array, an NSManagedObject instance or a combination of the two. They don't even have to share the same entity type ;)
+With Stack, you can use a transaction block at anytime to make changes safely. In fact if you have an object from another context/thread you can safely update that too using the Stack macros `stack_prepare(...)` and `stack_copy(...)` which take multiple arguments so you can pass an array, an NSManagedObject instance or a combination of the two. They don't even have to share the same entity type ;)
 
 You can even use Stack queries in, out and around the transaction because Stack automatically uses the right context for you.
 
@@ -46,9 +46,10 @@ Stack *stack = [Stack defaultStack];
   // person.name is 'Shaps'
   
   dispatch_async(dispatch_get_global_queue(0, 0), ^{
+   	 stack_prepare(person);
     stack.transaction(^{
       
-      @stack_copy(person);
+      stack_copy(person);
       person.name = @"Anne";
       
     }); // person.name is safely updated
@@ -167,13 +168,37 @@ Instead all `write` actions _must_ be performed inside a transaction block, wher
 
 Read actions can occur anywhere, since those are not a concern. By forcing you to use a transaction block for all saves, Stack can provide better exception and error handling. In fact if you attempt to write to any context outside of a transaction block (even if you're not using Stack directly), an exception will be thrown, making it much easier to find threading issues in your project.
 
-Sometimes however you need to `read` on one thread but want to `write` on another. Stack provides a convenient method macro for copying your objects into the current context for you:
+Sometimes however you need to `read` on one thread but want to `write` on another. Stack provides a convenient method macro for copying your objects into the current context for you.
+
+So right before your transaction you can prepare the objects like so:
 
 ```objc
-@stack_copy(...)
-@stack_copy(people)
-@stack_copy(person1, people)
+stack_prepare(...)
+stack_prepare(people)
+stack_prepare(person1, people)
 ```
+
+Then inside your transaction just copy them into your local context:
+
+```objc
+stack_copy(...)
+stack_copy(people)
+stack_copy(person1, people)
+```
+
+**Example**
+
+```objc
+Person *person = ...; // this was fetched already from another thread/context
+
+stack_prepare(person);
+Stack.defaultStack.transaction(^{
+	stack_copy(person); // we now have a local context version
+	person.name = @"";
+});
+
+```
+
 
 This allows you to copy an array, a single object, or some variation since the macro uses variadic arguments.
 

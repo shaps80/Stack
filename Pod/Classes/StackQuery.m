@@ -44,6 +44,7 @@
 @property (nonatomic, strong) NSFetchRequest *fetchRequest;
 @property (nonatomic, strong) NSString *entityName;
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, strong) NSArray *identifiers;
 @end
 
 @implementation StackQuery
@@ -76,59 +77,28 @@
   };
 }
 
-- (id (^)(id, BOOL))whereIdentifier
+- (StackQuery* (^)(id))whereIdentifier
 {
-  return ^(id identifier, BOOL createIfNil) {
-    NSUInteger limit = self.fetchRequest.fetchLimit;
-    
+  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
+  
+  return ^(id identifier) {
+    self.identifiers = @[ identifier ];
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", [self.managedObjectClass identifierKey], identifier];
     self.fetchRequest.predicate = predicate;
     self.fetchRequest.fetchLimit = 1;
-    
-    NSArray *results = [self executeFetchRequest];
-    
-    if (results.count || !createIfNil) {
-      self.fetchRequest.fetchLimit = limit;
-      return results.firstObject;
-    }
-    
-    id object = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
-    [object setValue:identifier forKey:[self.managedObjectClass identifierKey]];
-    
-    return object;
+    return self;
   };
 }
 
-- (NSArray *(^)(NSArray *, BOOL))whereIdentifiers
+- (StackQuery *(^)(NSArray *))whereIdentifiers
 {
-  return ^(NSArray *identifiers, BOOL createIfNil) {
+  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
+  
+  return ^(NSArray *identifiers) {
+    self.identifiers = identifiers.copy;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K IN %@", [self.managedObjectClass identifierKey], identifiers];
     self.fetchRequest.predicate = predicate;
-    
-    NSArray *objects = [self executeFetchRequest];
-    
-    if (objects.count == identifiers.count || !createIfNil) {
-      self.fetchRequest = nil;
-      return objects;
-    }
-    
-    NSMutableArray *results = [NSMutableArray new];
-    [results addObjectsFromArray:objects];
-    
-    NSMutableSet *identifiersSet = [NSMutableSet setWithArray:identifiers];
-    NSSet *existingIdentifiersSet = [NSSet setWithArray:[objects valueForKey:[self.managedObjectClass identifierKey]]];
-    
-    [identifiersSet minusSet:existingIdentifiersSet];
-    
-    for (id identifier in identifiersSet) {
-      id newObject = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
-      [newObject setValue:identifier forKey:[self.managedObjectClass identifierKey]];
-      [results addObject:newObject];
-    }
-    
-    objects = [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
-    
-    return objects;
+    return self;
   };
 }
 
@@ -136,6 +106,30 @@
 {
   return ^(NSManagedObjectID *objectID) {
     return [self.managedObjectContext objectWithID:objectID];
+  };
+}
+
+- (StackQuery *(^)(NSString *, ...))whereFormat
+{
+  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
+  
+  return ^(NSString *format, ...) {
+    va_list args;
+    va_start(args, format);
+    self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format arguments:args];
+    va_end(args);
+    
+    return self;
+  };
+}
+
+- (StackQuery *(^)(NSPredicate *))wherePredicate
+{
+  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
+  
+  return ^(NSPredicate *predicate) {
+    self.fetchRequest.predicate = predicate;
+    return self;
   };
 }
 
@@ -151,26 +145,6 @@
 {
   return ^(NSArray *sortDescriptors) {
     self.fetchRequest.sortDescriptors = sortDescriptors;
-    return self;
-  };
-}
-
-- (StackQuery *(^)(NSString *, ...))whereFormat
-{
-  return ^(NSString *format, ...) {
-    va_list args;
-    va_start(args, format);
-    self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format arguments:args];
-    va_end(args);
-    
-    return self;
-  };
-}
-
-- (StackQuery *(^)(NSPredicate *))wherePredicate
-{
-  return ^(NSPredicate *predicate) {
-    self.fetchRequest.predicate = predicate;
     return self;
   };
 }
@@ -237,16 +211,47 @@
   };
 }
 
-- (NSArray *(^)())fetch
+- (id (^)())fetchOrCreate
 {
-  return ^{
-    return [self executeFetchRequest];
+  return ^id{
+    NSArray *objects = [self executeFetchRequest];
+    
+    if (objects.count == self.identifiers.count) {
+      self.fetchRequest = nil;
+      return objects;
+    }
+    
+    NSMutableArray *results = [NSMutableArray new];
+    [results addObjectsFromArray:objects];
+    
+    NSMutableSet *identifiersSet = [NSMutableSet setWithArray:self.identifiers];
+    NSSet *existingIdentifiersSet = [NSSet setWithArray:[objects valueForKey:[self.managedObjectClass identifierKey]]];
+    
+    [identifiersSet minusSet:existingIdentifiersSet];
+    
+    for (id identifier in identifiersSet) {
+      id newObject = [NSEntityDescription insertNewObjectForEntityForName:self.fetchRequest.entityName inManagedObjectContext:self.managedObjectContext];
+      [newObject setValue:identifier forKey:[self.managedObjectClass identifierKey]];
+      [results addObject:newObject];
+    }
+    
+    objects = [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
+
+    return (objects.count > 1) ? objects : objects.firstObject;
+  };
+}
+
+- (id (^)())fetch
+{
+  return ^id {
+    NSArray *objects = [self executeFetchRequest];
+    return (objects.count > 1) ? objects : objects.firstObject;
   };
 }
 
 - (id (^)())firstObject
 {
-  return ^{
+  return ^id{
     self.fetchRequest.fetchOffset = 0;
     self.fetchRequest.fetchBatchSize = 1;
     self.fetchRequest.fetchLimit = 1;
@@ -256,7 +261,7 @@
 
 - (id (^)())lastObject
 {
-  return ^{
+  return ^id {
     __block NSUInteger count = 0;
     
     [self.managedObjectContext performBlockAndWait:^{
