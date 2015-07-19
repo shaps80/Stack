@@ -1,1 +1,0 @@
-../../../../../Pod/Classes/Internal/NSManagedObjectContext+StackAdditions.h
