@@ -44,7 +44,7 @@
 /**
  *  Returns a new configured NSFetchedResultsController
  */
-@property (nonatomic, readonly) NSFetchedResultsController *(^fetchedResultsController)(NSString *sectionNameKeyPath, id <NSFetchedResultsControllerDelegate> delegate);
+@property (nonatomic, readonly) NSFetchedResultsController *(^fetchedResultsController)();
 
 
 /**
@@ -74,6 +74,12 @@
  *  @param sortDescriptors  The array of NSSortDescriptors to add to this query
  */
 @property (nonatomic, readonly) StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
+
+
+/**
+ *  Adds grouping to the query. Note: using this option is ONLY used when calling fetchedResultsController. Otherwise it is ignored
+ */
+@property (nonatomic, readonly) StackQuery *(^groupBy)(NSString *sectionNameKeyPath);
 
 
 /**

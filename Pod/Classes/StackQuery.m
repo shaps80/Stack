@@ -45,6 +45,7 @@
 @property (nonatomic, strong) NSString *entityName;
 @property (nonatomic, strong) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong) NSArray *identifiers;
+@property (nonatomic, strong) NSString *sectionNameKeyPath;
 @end
 
 @implementation StackQuery
@@ -62,26 +63,33 @@
   return self.stack.currentThreadContext;
 }
 
-- (NSFetchedResultsController *(^)(NSString *, id<NSFetchedResultsControllerDelegate>))fetchedResultsController
+- (NSFetchedResultsController *(^)())fetchedResultsController
 {
-  return ^(NSString *sectionNameKeyPath, id <NSFetchedResultsControllerDelegate> delegate) {
+  return ^{
     SPXCAssertTrueOrPerformAction([NSThread isMainThread], return (NSFetchedResultsController *)nil);
     __block NSFetchedResultsController *controller = nil;
     
     [self.managedObjectContext performBlockAndWait:^{
-      controller = [[NSFetchedResultsController alloc] initWithFetchRequest:self.fetchRequest managedObjectContext:self.stack.mainThreadContext sectionNameKeyPath:sectionNameKeyPath cacheName:nil];
-      controller.delegate = delegate;
+      controller = [[NSFetchedResultsController alloc] initWithFetchRequest:self.fetchRequest managedObjectContext:self.stack.mainThreadContext sectionNameKeyPath:self.sectionNameKeyPath cacheName:nil];
     }];
     
     return controller;
   };
 }
 
+- (StackQuery *(^)(NSString *))groupBy
+{
+  return ^(NSString *sectionNameOrKeyPath) {
+    self.sectionNameKeyPath = sectionNameOrKeyPath;
+    return self;
+  };
+}
+
 - (StackQuery* (^)(id))whereIdentifier
 {
-  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
-  
   return ^(id identifier) {
+    SPXCAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate); return (StackQuery *)nil);
+    
     self.identifiers = @[ identifier ];
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", [self.managedObjectClass identifierKey], identifier];
     self.fetchRequest.predicate = predicate;
@@ -92,9 +100,9 @@
 
 - (StackQuery *(^)(NSArray *))whereIdentifiers
 {
-  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
-  
   return ^(NSArray *identifiers) {
+    SPXCAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate); return (StackQuery *)nil);
+
     self.identifiers = identifiers.copy;
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K IN %@", [self.managedObjectClass identifierKey], identifiers];
     self.fetchRequest.predicate = predicate;
@@ -111,9 +119,9 @@
 
 - (StackQuery *(^)(NSString *, ...))whereFormat
 {
-  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
-  
   return ^(NSString *format, ...) {
+    SPXCAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate); return (StackQuery *)nil);
+
     va_list args;
     va_start(args, format);
     self.fetchRequest.predicate = [NSPredicate predicateWithFormat:format arguments:args];
@@ -125,9 +133,9 @@
 
 - (StackQuery *(^)(NSPredicate *))wherePredicate
 {
-  SPXAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate));
-  
   return ^(NSPredicate *predicate) {
+    SPXCAssertTrueOrPerformAction(!self.fetchRequest.predicate, SPXLog(@"You cannot specify another predicate. You currently have the following predicate defined: %@", self.fetchRequest.predicate); return (StackQuery *)nil);
+
     self.fetchRequest.predicate = predicate;
     return self;
   };

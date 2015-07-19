@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface StackViewController : UIViewController
-
+@interface StackViewController : UIViewController <UITableViewDataSource>
+@property (nonatomic, weak) IBOutlet UITableView *tableView;
 @end

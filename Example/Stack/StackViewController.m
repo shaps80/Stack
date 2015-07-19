@@ -10,8 +10,13 @@
 #import "Stack.h"
 #import "Person.h"
 
+@interface StackViewController () <NSFetchedResultsControllerDelegate>
+@property (nonatomic, strong) NSFetchedResultsController *fetchedResultsController;
+@end
 
 @implementation StackViewController
+
+#pragma mark - Lifecycle
 
 - (void)viewDidLoad
 {
@@ -21,42 +26,96 @@
   StackQuery *query = stack.query(Person.class);
   
   [self createObjectsWithQuery:query];
-//  [.self deleteObjectsWithQuery:query];
-}
-
-- (void)deleteObjectsWithQuery:(StackQuery *)query
-{
-  query.delete();
-  NSLog(@"%zd", query.count());
+  
+  self.fetchedResultsController = query.sortByKey(@"name", YES).fetchedResultsController();
+  self.fetchedResultsController.delegate = self;
+  [self.fetchedResultsController performFetch:nil];
 }
 
 - (void)createObjectsWithQuery:(StackQuery *)query
 {
-  NSArray *people = query.fetch();
-  Person *person = query.whereIdentifier(@"124").fetchOrCreate();
-  
-  stack_prepare(people, person);
-  for (int i = 0; i < 100; i++) {
-    query.stack.transaction(^{
-      stack_copy(people, person);
-      person.name = @"Shaps";
-    });
-  }
-  
-  NSLog(@"%zd", query.count());
+  query.stack.transaction(^{
+    Person *person = query.whereIdentifier(@"124").fetchOrCreate();
+    person.name = @"Shaps";
+    
+    person = query.whereIdentifier(@"321").fetchOrCreate();
+    person.name = @"Shaps";
+    
+    person = query.whereIdentifier(@"432").fetchOrCreate();
+    person.name = @"Anne";
+    
+    person = query.whereIdentifier(@"987").fetchOrCreate();
+    person.name = @"Lara";
+  });
 }
 
-- (void)updateObject:(Person *)person withStack:(Stack *)stack
+
+#pragma mark - TableView Datasource
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  NSLog(@"Before: %@", person.name);
+  UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
   
-  stack_prepare(person);
-  stack.transaction(^{
-    stack_copy(person);
-    person.name = @"Mohsenin";
-  });
+  Person *person = [self.fetchedResultsController objectAtIndexPath:indexPath];
+  cell.textLabel.text = person.name;
   
-  NSLog(@"After: %@", [stack.query(person.class).fetch() name]);
+  return cell;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+  return self.fetchedResultsController.sections.count;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+  id <NSFetchedResultsSectionInfo> info = [self.fetchedResultsController sections][section];
+  return [info numberOfObjects];
+}
+
+#pragma mark - NSFetchedResultsController Delegate
+
+- (void)controllerWillChangeContent:(NSFetchedResultsController *)controller
+{
+  [self.tableView beginUpdates];
+}
+
+- (void)controller:(NSFetchedResultsController *)controller didChangeSection:(id<NSFetchedResultsSectionInfo>)sectionInfo atIndex:(NSUInteger)sectionIndex forChangeType:(NSFetchedResultsChangeType)type
+{
+  switch (type) {
+    case NSFetchedResultsChangeInsert:
+      [self.tableView insertSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationAutomatic];
+      break;
+    case NSFetchedResultsChangeDelete:
+      [self.tableView deleteSections:[NSIndexSet indexSetWithIndex:sectionIndex] withRowAnimation:UITableViewRowAnimationAutomatic];
+      break;
+    default:
+      [self.tableView reloadData];
+      break;
+  }
+}
+
+- (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(NSIndexPath *)newIndexPath
+{
+  switch (type) {
+    case NSFetchedResultsChangeInsert:
+      [self.tableView insertRowsAtIndexPaths:@[ newIndexPath ] withRowAnimation:UITableViewRowAnimationAutomatic];
+      break;
+    case NSFetchedResultsChangeDelete:
+      [self.tableView deleteRowsAtIndexPaths:@[ indexPath ] withRowAnimation:UITableViewRowAnimationAutomatic];
+      break;
+    case NSFetchedResultsChangeMove:
+      [self.tableView moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+      break;
+    case NSFetchedResultsChangeUpdate:
+      [self.tableView reloadRowsAtIndexPaths:@[ indexPath ] withRowAnimation:UITableViewRowAnimationAutomatic];
+      break;
+  }
+}
+
+- (void)controllerDidChangeContent:(NSFetchedResultsController *)controller
+{
+  [self.tableView endUpdates];
 }
 
 @end
