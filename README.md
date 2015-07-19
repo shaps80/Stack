@@ -46,7 +46,7 @@ Stack *stack = [Stack defaultStack];
   // person.name is 'Shaps'
   
   dispatch_async(dispatch_get_global_queue(0, 0), ^{
-   	 stack_prepare(person);
+    stack_prepare(person);
     stack.transaction(^{
       
       stack_copy(person);
