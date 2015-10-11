@@ -8,12 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		473DFEB292B8DC898AD1ACEB /* libPods-Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D4ABAE56D7BB7D51B1E4E29 /* libPods-Tests.a */; };
+		5432E8DA1B7E0C5D00CF11FD /* Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5432E8D91B7E0C5D00CF11FD /* Query.swift */; };
+		5432E8DC1B7E0C6C00CF11FD /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5432E8DB1B7E0C6C00CF11FD /* Transaction.swift */; };
+		5432E8DE1B7E120500CF11FD /* StackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5432E8DD1B7E120500CF11FD /* StackViewController.swift */; };
+		54BF219C1B7D1630008FB574 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54BF219A1B7D1630008FB574 /* Model.xcdatamodeld */; };
+		54BF21A01B7D16A7008FB574 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54BF219F1B7D16A7008FB574 /* Stack.swift */; };
+		54BF21A81B7D5951008FB574 /* Address.m in Sources */ = {isa = PBXBuildFile; fileRef = 54BF21A71B7D5951008FB574 /* Address.m */; };
 		54C103531AA9F32200533194 /* StackSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 54C103521AA9F32200533194 /* StackSpec.m */; };
 		54C103551AA9F32900533194 /* StackQuerySpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 54C103541AA9F32900533194 /* StackQuerySpec.m */; };
 		54C103571AA9F33400533194 /* StackTransactionSpec.m in Sources */ = {isa = PBXBuildFile; fileRef = 54C103561AA9F33400533194 /* StackTransactionSpec.m */; };
-		54C103581AA9F3BC00533194 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54E053601A86FB6F00B01B07 /* Model.xcdatamodeld */; };
 		54C103591AA9F3BF00533194 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E053631A86FB6F00B01B07 /* Person.m */; };
-		54E053641A86FB6F00B01B07 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54E053601A86FB6F00B01B07 /* Model.xcdatamodeld */; };
 		54E053651A86FB6F00B01B07 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E053631A86FB6F00B01B07 /* Person.m */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
@@ -45,6 +49,16 @@
 /* Begin PBXFileReference section */
 		0D4ABAE56D7BB7D51B1E4E29 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D21645429924D6028AB2321 /* Stack.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Stack.podspec; path = ../Stack.podspec; sourceTree = "<group>"; };
+		5432E8D91B7E0C5D00CF11FD /* Query.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
+		5432E8DB1B7E0C6C00CF11FD /* Transaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		5432E8DD1B7E120500CF11FD /* StackViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackViewController.swift; sourceTree = "<group>"; };
+		54BF219B1B7D1630008FB574 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		54BF219E1B7D16A7008FB574 /* Stack-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Stack-Bridging-Header.h"; sourceTree = "<group>"; };
+		54BF219F1B7D16A7008FB574 /* Stack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
+		54BF21A41B7D5951008FB574 /* Person+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Person+CoreDataProperties.h"; sourceTree = "<group>"; };
+		54BF21A51B7D5951008FB574 /* Address+CoreDataProperties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Address+CoreDataProperties.h"; sourceTree = "<group>"; };
+		54BF21A61B7D5951008FB574 /* Address.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Address.h; sourceTree = "<group>"; };
+		54BF21A71B7D5951008FB574 /* Address.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Address.m; sourceTree = "<group>"; };
 		54C103521AA9F32200533194 /* StackSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackSpec.m; sourceTree = "<group>"; };
 		54C103541AA9F32900533194 /* StackQuerySpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackQuerySpec.m; sourceTree = "<group>"; };
 		54C103561AA9F33400533194 /* StackTransactionSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackTransactionSpec.m; sourceTree = "<group>"; };
@@ -60,7 +74,6 @@
 		54DE4ECB1AA8C436004AC3E4 /* StackQuery.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackQuery.m; sourceTree = "<group>"; };
 		54DE4ECC1AA8C436004AC3E4 /* StackTransaction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackTransaction.h; sourceTree = "<group>"; };
 		54DE4ECD1AA8C436004AC3E4 /* StackTransaction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackTransaction.m; sourceTree = "<group>"; };
-		54E053611A86FB6F00B01B07 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		54E053621A86FB6F00B01B07 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
 		54E053631A86FB6F00B01B07 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* Stack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stack.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,9 +142,21 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		54BF219D1B7D168A008FB574 /* Swift */ = {
+			isa = PBXGroup;
+			children = (
+				54BF219F1B7D16A7008FB574 /* Stack.swift */,
+				5432E8D91B7E0C5D00CF11FD /* Query.swift */,
+				5432E8DB1B7E0C6C00CF11FD /* Transaction.swift */,
+				54BF219E1B7D16A7008FB574 /* Stack-Bridging-Header.h */,
+			);
+			path = Swift;
+			sourceTree = "<group>";
+		};
 		54DE4EBF1AA8C436004AC3E4 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				54BF219D1B7D168A008FB574 /* Swift */,
 				54DE4EC11AA8C436004AC3E4 /* Internal */,
 				54DE4EC81AA8C436004AC3E4 /* Stack.h */,
 				54DE4EC91AA8C436004AC3E4 /* Stack.m */,
@@ -170,9 +195,13 @@
 		54E053671A86FB8200B01B07 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				54BF21A41B7D5951008FB574 /* Person+CoreDataProperties.h */,
+				54BF21A51B7D5951008FB574 /* Address+CoreDataProperties.h */,
+				54BF21A61B7D5951008FB574 /* Address.h */,
+				54BF21A71B7D5951008FB574 /* Address.m */,
 				54E053621A86FB6F00B01B07 /* Person.h */,
 				54E053631A86FB6F00B01B07 /* Person.m */,
-				54E053601A86FB6F00B01B07 /* Model.xcdatamodeld */,
+				54BF219A1B7D1630008FB574 /* Model.xcdatamodeld */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -219,6 +248,7 @@
 				6003F59D195388D20070C39A /* StackAppDelegate.m */,
 				6003F5A5195388D20070C39A /* StackViewController.h */,
 				6003F5A6195388D20070C39A /* StackViewController.m */,
+				5432E8DD1B7E120500CF11FD /* StackViewController.swift */,
 				54E053671A86FB8200B01B07 /* Model */,
 				54E053661A86FB7800B01B07 /* Resources */,
 				6003F594195388D20070C39A /* Supporting Files */,
@@ -317,7 +347,8 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = Stack;
-				LastUpgradeCheck = 0510;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Shaps Mohsenin";
 				TargetAttributes = {
 					6003F5AD195388D20070C39A = {
@@ -436,9 +467,14 @@
 			files = (
 				6003F59E195388D20070C39A /* StackAppDelegate.m in Sources */,
 				6003F5A7195388D20070C39A /* StackViewController.m in Sources */,
+				54BF21A81B7D5951008FB574 /* Address.m in Sources */,
 				54E053651A86FB6F00B01B07 /* Person.m in Sources */,
+				5432E8DA1B7E0C5D00CF11FD /* Query.swift in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
-				54E053641A86FB6F00B01B07 /* Model.xcdatamodeld in Sources */,
+				54BF21A01B7D16A7008FB574 /* Stack.swift in Sources */,
+				5432E8DE1B7E120500CF11FD /* StackViewController.swift in Sources */,
+				54BF219C1B7D1630008FB574 /* Model.xcdatamodeld in Sources */,
+				5432E8DC1B7E0C6C00CF11FD /* Transaction.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,7 +486,6 @@
 				54C103531AA9F32200533194 /* StackSpec.m in Sources */,
 				54C103591AA9F3BF00533194 /* Person.m in Sources */,
 				54C103571AA9F33400533194 /* StackTransactionSpec.m in Sources */,
-				54C103581AA9F3BC00533194 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,6 +553,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -578,10 +614,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stack/Stack-Prefix.pch";
 				INFOPLIST_FILE = "Stack/Stack-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "../Pod/Classes/Swift/Stack-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -592,10 +633,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CLANG_ENABLE_MODULES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stack/Stack-Prefix.pch";
 				INFOPLIST_FILE = "Stack/Stack-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "../Pod/Classes/Swift/Stack-Bridging-Header.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -619,6 +664,7 @@
 					NS_BLOCK_ASSERTIONS,
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
@@ -643,6 +689,7 @@
 					NS_BLOCK_ASSERTIONS,
 				);
 				INFOPLIST_FILE = "Tests/Tests-Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
@@ -682,12 +729,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		54E053601A86FB6F00B01B07 /* Model.xcdatamodeld */ = {
+		54BF219A1B7D1630008FB574 /* Model.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				54E053611A86FB6F00B01B07 /* Model.xcdatamodel */,
+				54BF219B1B7D1630008FB574 /* Model.xcdatamodel */,
 			);
-			currentVersion = 54E053611A86FB6F00B01B07 /* Model.xcdatamodel */;
+			currentVersion = 54BF219B1B7D1630008FB574 /* Model.xcdatamodel */;
 			path = Model.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
