@@ -45,21 +45,21 @@
 /* Begin PBXFileReference section */
 		0D4ABAE56D7BB7D51B1E4E29 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D21645429924D6028AB2321 /* Stack.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = Stack.podspec; path = ../Stack.podspec; sourceTree = "<group>"; };
+		5422D51D1C02330E00517822 /* metamacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
+		5422D51E1C02330E00517822 /* NSManagedObject+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+StackAdditions.h"; sourceTree = "<group>"; };
+		5422D51F1C02330E00517822 /* NSManagedObject+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+StackAdditions.m"; sourceTree = "<group>"; };
+		5422D5201C02330E00517822 /* NSManagedObjectContext+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+StackAdditions.h"; sourceTree = "<group>"; };
+		5422D5211C02330E00517822 /* NSManagedObjectContext+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+StackAdditions.m"; sourceTree = "<group>"; };
+		5422D5221C02330E00517822 /* StackDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackDefines.h; sourceTree = "<group>"; };
+		5422D5231C02330E00517822 /* Stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Stack.h; sourceTree = "<group>"; };
+		5422D5241C02330E00517822 /* Stack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Stack.m; sourceTree = "<group>"; };
+		5422D5251C02330E00517822 /* StackQuery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackQuery.h; sourceTree = "<group>"; };
+		5422D5261C02330E00517822 /* StackQuery.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackQuery.m; sourceTree = "<group>"; };
+		5422D5271C02330E00517822 /* StackTransaction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackTransaction.h; sourceTree = "<group>"; };
+		5422D5281C02330E00517822 /* StackTransaction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackTransaction.m; sourceTree = "<group>"; };
 		54C103521AA9F32200533194 /* StackSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackSpec.m; sourceTree = "<group>"; };
 		54C103541AA9F32900533194 /* StackQuerySpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackQuerySpec.m; sourceTree = "<group>"; };
 		54C103561AA9F33400533194 /* StackTransactionSpec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StackTransactionSpec.m; sourceTree = "<group>"; };
-		54DE4EC21AA8C436004AC3E4 /* metamacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metamacros.h; sourceTree = "<group>"; };
-		54DE4EC31AA8C436004AC3E4 /* NSManagedObject+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObject+StackAdditions.h"; sourceTree = "<group>"; };
-		54DE4EC41AA8C436004AC3E4 /* NSManagedObject+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObject+StackAdditions.m"; sourceTree = "<group>"; };
-		54DE4EC51AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSManagedObjectContext+StackAdditions.h"; sourceTree = "<group>"; };
-		54DE4EC61AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSManagedObjectContext+StackAdditions.m"; sourceTree = "<group>"; };
-		54DE4EC71AA8C436004AC3E4 /* StackDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackDefines.h; sourceTree = "<group>"; };
-		54DE4EC81AA8C436004AC3E4 /* Stack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Stack.h; sourceTree = "<group>"; };
-		54DE4EC91AA8C436004AC3E4 /* Stack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Stack.m; sourceTree = "<group>"; };
-		54DE4ECA1AA8C436004AC3E4 /* StackQuery.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackQuery.h; sourceTree = "<group>"; };
-		54DE4ECB1AA8C436004AC3E4 /* StackQuery.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackQuery.m; sourceTree = "<group>"; };
-		54DE4ECC1AA8C436004AC3E4 /* StackTransaction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StackTransaction.h; sourceTree = "<group>"; };
-		54DE4ECD1AA8C436004AC3E4 /* StackTransaction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StackTransaction.m; sourceTree = "<group>"; };
 		54E053611A86FB6F00B01B07 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		54E053621A86FB6F00B01B07 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
 		54E053631A86FB6F00B01B07 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
@@ -129,30 +129,30 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		54DE4EBF1AA8C436004AC3E4 /* Classes */ = {
+		5422D51B1C02330E00517822 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				54DE4EC11AA8C436004AC3E4 /* Internal */,
-				54DE4EC81AA8C436004AC3E4 /* Stack.h */,
-				54DE4EC91AA8C436004AC3E4 /* Stack.m */,
-				54DE4ECA1AA8C436004AC3E4 /* StackQuery.h */,
-				54DE4ECB1AA8C436004AC3E4 /* StackQuery.m */,
-				54DE4ECC1AA8C436004AC3E4 /* StackTransaction.h */,
-				54DE4ECD1AA8C436004AC3E4 /* StackTransaction.m */,
+				5422D51C1C02330E00517822 /* Internal */,
+				5422D5231C02330E00517822 /* Stack.h */,
+				5422D5241C02330E00517822 /* Stack.m */,
+				5422D5251C02330E00517822 /* StackQuery.h */,
+				5422D5261C02330E00517822 /* StackQuery.m */,
+				5422D5271C02330E00517822 /* StackTransaction.h */,
+				5422D5281C02330E00517822 /* StackTransaction.m */,
 			);
 			name = Classes;
 			path = ../Pod/Classes;
 			sourceTree = "<group>";
 		};
-		54DE4EC11AA8C436004AC3E4 /* Internal */ = {
+		5422D51C1C02330E00517822 /* Internal */ = {
 			isa = PBXGroup;
 			children = (
-				54DE4EC31AA8C436004AC3E4 /* NSManagedObject+StackAdditions.h */,
-				54DE4EC41AA8C436004AC3E4 /* NSManagedObject+StackAdditions.m */,
-				54DE4EC51AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.h */,
-				54DE4EC61AA8C436004AC3E4 /* NSManagedObjectContext+StackAdditions.m */,
-				54DE4EC71AA8C436004AC3E4 /* StackDefines.h */,
-				54DE4EC21AA8C436004AC3E4 /* metamacros.h */,
+				5422D51D1C02330E00517822 /* metamacros.h */,
+				5422D51E1C02330E00517822 /* NSManagedObject+StackAdditions.h */,
+				5422D51F1C02330E00517822 /* NSManagedObject+StackAdditions.m */,
+				5422D5201C02330E00517822 /* NSManagedObjectContext+StackAdditions.h */,
+				5422D5211C02330E00517822 /* NSManagedObjectContext+StackAdditions.m */,
+				5422D5221C02330E00517822 /* StackDefines.h */,
 			);
 			path = Internal;
 			sourceTree = "<group>";
@@ -180,7 +180,7 @@
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
-				54DE4EBF1AA8C436004AC3E4 /* Classes */,
+				5422D51B1C02330E00517822 /* Classes */,
 				6003F593195388D20070C39A /* Stack */,
 				60FF7A9C1954A5C5007DD14C /* Podspec Metadata */,
 				6003F5B5195388D20070C39A /* Tests */,

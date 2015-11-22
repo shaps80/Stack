@@ -143,13 +143,13 @@
 /**
  *  Performs the query and returns the results
  */
-@property (nonatomic, readonly) id (^fetch)();
+@property (nonatomic, readonly) NSArray* (^fetch)();
 
 
 /**
  *  Fetches the associated objects, or creates them if possible. Note
  */
-@property (nonatomic, readonly) id (^fetchOrCreate)();
+@property (nonatomic, readonly) NSArray* (^fetchOrCreate)();
 
 
 /**

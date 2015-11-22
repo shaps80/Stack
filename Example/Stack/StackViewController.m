@@ -35,16 +35,16 @@
 - (void)createObjectsWithQuery:(StackQuery *)query
 {
   query.stack.transaction(^{
-    Person *person = query.whereIdentifier(@"124").fetchOrCreate();
+    Person *person = query.whereIdentifier(@"124").fetchOrCreate().firstObject;
     person.name = @"Shaps";
     
-    person = query.whereIdentifier(@"321").fetchOrCreate();
+    person = query.whereIdentifier(@"321").fetchOrCreate().firstObject;
     person.name = @"Shaps";
     
-    person = query.whereIdentifier(@"432").fetchOrCreate();
+    person = query.whereIdentifier(@"432").fetchOrCreate().firstObject;
     person.name = @"Anne";
     
-    person = query.whereIdentifier(@"987").fetchOrCreate();
+    person = query.whereIdentifier(@"987").fetchOrCreate().firstObject;
     person.name = @"Lara";
   });
 }

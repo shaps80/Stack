@@ -55,6 +55,14 @@
   StackQuery *query = [StackQuery new];
   query.managedObjectClass = managedObjectClass;
   query.entityName = entityName;
+  
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-method-access"
+  if (!entityName) {
+    query.entityName = entityName ?: [managedObjectClass entityName];
+  }
+#pragma clang diagnostic pop
+  
   return query;
 }
 
@@ -219,9 +227,9 @@
   };
 }
 
-- (id (^)())fetchOrCreate
+- (NSArray* (^)())fetchOrCreate
 {
-  return ^id{
+  return ^NSArray*{
     NSArray *objects = [self executeFetchRequest];
     
     if (objects.count == self.identifiers.count) {
@@ -243,17 +251,14 @@
       [results addObject:newObject];
     }
     
-    objects = [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
-
-    return (objects.count > 1) ? objects : objects.firstObject;
+    return [results sortedArrayUsingDescriptors:self.fetchRequest.sortDescriptors];
   };
 }
 
-- (id (^)())fetch
+- (NSArray* (^)())fetch
 {
-  return ^id {
-    NSArray *objects = [self executeFetchRequest];
-    return (objects.count > 1) ? objects : objects.firstObject;
+  return ^NSArray* {
+    return [self executeFetchRequest];
   };
 }
 

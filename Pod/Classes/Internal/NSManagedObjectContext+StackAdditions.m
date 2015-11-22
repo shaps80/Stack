@@ -44,6 +44,11 @@
   };
   
   void(^saveBlock)() = ^() {
+    if (!self.hasChanges) {
+      !completion ?: completion(NO, nil);
+      return;
+    }
+    
     NSError *error = nil;
     BOOL saved = [self save:&error];
     
@@ -58,11 +63,6 @@
       }
     }
   };
-  
-  if (!self.hasChanges) {
-    !completion ?: completion(NO, nil);
-    return;
-  }
   
   if (synchronous) {
     [self performBlockAndWait:saveBlock];
