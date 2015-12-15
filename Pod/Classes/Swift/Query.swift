@@ -8,8 +8,9 @@
 //
 
 import Foundation
+import CoreData
 
-class Query<T> {
+final class Query<T: NSManagedObject> {
   
   private(set) var predicate: NSPredicate?
   private(set) var sortDescriptors: [NSSortDescriptor]
@@ -17,6 +18,7 @@ class Query<T> {
   private(set) var fetchLimit: Int = 0
   private(set) var fetchOffset: Int
   private(set) var fetchBatchSize: Int
+  internal var fetchRequest: NSFetchRequest
   
   func limit(limit: Int) -> Query<T> {
     fetchLimit = limit
@@ -59,6 +61,9 @@ class Query<T> {
     self.fetchLimit = 0;
     self.fetchOffset = 0
     self.fetchBatchSize = 0
+    
+    let entityName = ""
+    fetchRequest = NSFetchRequest(entityName: entityName)
   }
   
   convenience init(objectID: NSManagedObjectID) {

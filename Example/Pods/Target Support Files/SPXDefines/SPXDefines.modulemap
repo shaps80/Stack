@@ -1,0 +1,6 @@
+framework module SPXDefines {
+  umbrella header "SPXDefines-umbrella.h"
+
+  export *
+  module * { export * }
+}

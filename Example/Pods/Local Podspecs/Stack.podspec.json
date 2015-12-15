@@ -2,7 +2,7 @@
   "name": "Stack",
   "version": "0.5.0",
   "summary": "A fresh, safer approach to CoreData",
-  "description": "                       Stack provides a safer implementation for working with CoreData\n",
+  "description": "Stack provides a safer implementation for working with CoreData",
   "homepage": "https://github.com/shaps80/Stack",
   "license": "MIT",
   "authors": {

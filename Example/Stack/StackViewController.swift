@@ -10,6 +10,10 @@ import UIKit
 
 class StackViewController: UITableViewController {
   
+  func test(configure: () -> ()) {
+    
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -17,6 +21,8 @@ class StackViewController: UITableViewController {
     let query = Query<Person>().sort("name", ascending: true)
     
     let person = stack.fetch(firstInQuery: query)
+
+    
     
     stack.write { (transaction) -> Void in
 //      let address = transaction.insert()

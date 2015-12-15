@@ -1,0 +1,6 @@
+framework module Pods_Stack {
+  umbrella header "Pods-Stack-umbrella.h"
+
+  export *
+  module * { export * }
+}

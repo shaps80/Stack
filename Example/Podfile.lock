@@ -1,5 +1,5 @@
 PODS:
-  - Kiwi (2.3.1)
+  - Kiwi (2.4.0)
   - SPXDefines (1.2.4)
   - Stack (0.5.0):
     - SPXDefines
@@ -13,8 +13,8 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  Kiwi: f038a6c61f7a9e4d7766bff5717aa3b3fdb75f55
+  Kiwi: f49c9d54b28917df5928fe44968a39ed198cb8a8
   SPXDefines: 264a8381a08080532d52b041559a6c32af19377b
-  Stack: 4c011671416837ee34a1082c92c742171c468a51
+  Stack: 023c16c64d35e2e2ccc52b291f65163a7216d33c
 
-COCOAPODS: 0.37.2
+COCOAPODS: 0.39.0

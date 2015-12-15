@@ -1,0 +1,1 @@
+../../../../../Pod/Classes/Swift/Stack-Bridging-Header.h
