@@ -1,0 +1,14 @@
+PODS:
+  - Stack (1.0.0)
+
+DEPENDENCIES:
+  - Stack (from `../`)
+
+EXTERNAL SOURCES:
+  Stack:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Stack: 9860e8d84d27e2155b67ae85305aaeb13794cc2f
+
+COCOAPODS: 0.39.0
