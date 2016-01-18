@@ -7,18 +7,25 @@
 //
 
 import UIKit
+import Stack
+import CoreData
 
-class ViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+class ViewController: UITableViewController {
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    let stack = Stack.defaultStack()
+    let query = Query<Friend>().fault(true).sort(byKey: "name", ascending: true)
+    
+    let person = stack.fetch(query).first
+    print(person)
+    
+    stack.write { (transaction) -> Void in
+      let person = try! transaction.insertOrFetch("name", identifier: "shaps") as Person
+      print(person.name)
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+  }
+  
 }
 
