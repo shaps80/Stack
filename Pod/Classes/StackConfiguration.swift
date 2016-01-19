@@ -15,8 +15,8 @@ public enum StackPersistenceType {
 }
 
 public enum StackType {
-  case Nested
-  case Parallel
+  case ParentChild
+  case ManualMerge
 }
 
 public final class StackConfiguration: CustomStringConvertible {
@@ -27,7 +27,7 @@ public final class StackConfiguration: CustomStringConvertible {
   
   public var name: String
   public var persistenceType: StackPersistenceType = .CoreData
-  public var stackType: StackType = .Nested
+  public var stackType: StackType = .ParentChild
   
   public lazy var storeOptions: [NSObject : AnyObject] = {
     return [ NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true ]

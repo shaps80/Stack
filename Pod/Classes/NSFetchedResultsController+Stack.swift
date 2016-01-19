@@ -8,20 +8,10 @@
 
 import CoreData
 
-public protocol EntityDescriptor: NSObjectProtocol {
-  static func entityName() -> String
-  static func primaryKey() -> (String, Any.Type)
-}
-
-extension NSManagedObject: EntityDescriptor {
+extension NSFetchedResultsController {
   
-  public class func entityName() -> String {
-    return NSStringFromClass(self)
-  }
-  
-  public class func primaryKey() -> (String, Any.Type) {
-    return ("identifier", String.self)
+  public convenience init<T>(stack: Stack, query: Query<T>) {
+    self.init()
   }
   
 }
-

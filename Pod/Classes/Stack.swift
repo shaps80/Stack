@@ -9,6 +9,12 @@
 import UIKit
 import CoreData
 
+public enum StackError: ErrorType {
+  case EntityNameNotFoundForClass(AnyClass)
+  case EntityNotFoundInStack(Stack, String)
+  case InvalidResultType(AnyClass.Type)
+}
+
 // MARK: Stack
 
 public final class Stack: CustomStringConvertible {
@@ -22,11 +28,24 @@ public final class Stack: CustomStringConvertible {
   private let coordinator: NSPersistentStoreCoordinator
   private let configuration: StackConfiguration
   
-  internal lazy var rootContext: NSManagedObjectContext = {
-    let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+  private lazy var rootContext: NSManagedObjectContext = {
+    let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
     context.persistentStoreCoordinator = self.coordinator
     return context
   }()
+  
+  
+  lazy var mainThreadContext: NSManagedObjectContext = {
+    let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+    context.parentContext = self.rootContext
+    return context
+  }()
+  
+  func currentThreadContext() -> NSManagedObjectContext {
+    let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+    context.parentContext = self.mainThreadContext
+    return context
+  }
   
   public class func add(name: String, configure: ((_: StackConfiguration) -> ())?) {
     let config = StackConfiguration(name: name)
@@ -107,43 +126,29 @@ extension Stack {
   
   public class func configureDefaults(configure: (_: StackConfiguration) -> ()) {
     let configuration = StackConfiguration(name: name)
+    
+    configuration.storeOptions = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
+    configuration.storeURL = NSURL(string: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first!)!
+    configuration.persistenceType = .MemoryOnly
+    configuration.stackType = .ParentChild
+    configuration.name = "My Stack" // becomes ./$STORE_URL/$NAME.sqlite
+    
     configure(configuration)
     DefaultConfiguration = configuration
   }
   
 }
 
-// MARK: Queries
+// MARK: Queries -- Makes Transaction's and Stack itself support querying
 
-extension Stack {
+protocol StackSupport {
+  func _stack() -> Stack
+}
+
+extension Stack: ReadSupport, StackSupport {
   
-  public func fetch<T: NSManagedObject>(query: Query<T>) -> [T] {
-    let entityName = NSStringFromClass(T)
-    let request = NSFetchRequest(entityName: entityName)
-    
-    request.fetchBatchSize = query.fetchBatchSize
-    request.fetchLimit = query.fetchLimit
-    request.fetchOffset = query.fetchOffset
-    request.sortDescriptors = query.sortDescriptors
-    request.predicate = query.predicate
-    request.returnsObjectsAsFaults = query.returnsObjectsAsFaults
-    
-    return [T]()
-  }
-  
-  public func count<T: NSManagedObject>(_: (query: Query<T>) -> ()) -> Int {
-    return 0
-  }
-  
-  public func count<T: NSManagedObject>(query: Query<T>) -> Int {
-    let _ = query
-    let entityName = NSStringFromClass(T)
-    let request = NSFetchRequest(entityName: entityName)
-    
-    request.predicate = query.predicate
-    
-    var error: NSError?
-    return self.rootContext.countForFetchRequest(request, error: &error)
+  func _stack() -> Stack {
+    return self
   }
   
   public func write(sync transaction: (transaction: Transaction) -> Void) {
@@ -157,7 +162,64 @@ extension Stack {
   
 }
 
+extension Transaction: ReadSupport, StackSupport {
+  
+  func _stack() -> Stack {
+    return self.stack
+  }
+  
+}
 
+public protocol ReadSupport {
+  
+  func count<T: NSManagedObject>(query: Query<T>) throws -> Int
+  
+  func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
+  func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
+  func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
+  
+}
 
-
+extension ReadSupport {
+ 
+  func _stack() -> Stack { return Stack.defaultStack() }
+  
+  public func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T] {
+    guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
+      throw StackError.EntityNameNotFoundForClass(T)
+    }
+    
+    guard let request = query.fetchRequestForEntityNamed(entityName) else {
+      throw StackError.EntityNotFoundInStack(_stack(), entityName)
+    }
+    
+    guard let results = try _stack().currentThreadContext().executeFetchRequest(request) as? [T] else {
+      throw StackError.InvalidResultType(T.Type)
+    }
+    
+    return results
+  }
+  
+  public func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T? {
+    return try fetch(query).first
+  }
+  
+  public func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T? {
+    return try fetch(query).first
+  }
+  
+  public func count<T: NSManagedObject>(query: Query<T>) throws -> Int {
+    guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
+      throw StackError.EntityNameNotFoundForClass(T)
+    }
+    
+    guard let request = query.fetchRequestForEntityNamed(entityName) else {
+      throw StackError.EntityNotFoundInStack(_stack(), entityName)
+    }
+    
+    var error: NSError?
+    return _stack().currentThreadContext().countForFetchRequest(request, error: &error)
+  }
+  
+}
 

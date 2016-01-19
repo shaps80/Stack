@@ -10,15 +10,43 @@
 import Foundation
 import CoreData
 
-public final class Query<T: NSManagedObject> {
+public class Query<T: NSManagedObject> {
   
-  private(set) var predicate: NSPredicate?
-  private(set) var sortDescriptors: [NSSortDescriptor]
+  private(set) var predicate: NSPredicate? {
+    get {
+      return self.predicate
+    }
+    set {
+      if predicate == nil {
+        self.predicate = newValue
+        return
+      }
+      
+      print("Query: The predicate can only be set once.")
+    }
+  }
+  
+  private(set) var sortDescriptors = [NSSortDescriptor]()
   private(set) var returnsObjectsAsFaults: Bool = true
-  private(set) var fetchLimit: Int = 0
-  private(set) var fetchOffset: Int
-  private(set) var fetchBatchSize: Int
-  internal var fetchRequest: NSFetchRequest
+  private(set) var fetchBatchSize: Int = 0
+  private(set) var fetchOffset: Int = 0
+  private(set) var fetchLimit: Int?
+  
+  func fetchRequestForEntityNamed(entityName: String) -> NSFetchRequest? {
+    let request = NSFetchRequest(entityName: entityName)
+    
+    request.sortDescriptors = sortDescriptors
+    request.predicate = predicate
+    request.returnsObjectsAsFaults = returnsObjectsAsFaults
+    request.fetchBatchSize = fetchBatchSize
+    request.fetchOffset = fetchOffset
+    
+    if let limit = fetchLimit {
+      request.fetchLimit = limit
+    }
+    
+    return request
+  }
   
   public func limit(limit: Int) -> Query<T> {
     fetchLimit = limit
@@ -50,10 +78,10 @@ public final class Query<T: NSManagedObject> {
     sortDescriptors.appendContentsOf(descriptors)
     return self
   }
-  
-  public func filter(format: NSString, _ args: CVarArgType...) -> Query<T> {
-    let query = self
-    return query
+
+  public func filter(format: String, _ arguments: CVarArgType...) -> Query<T> {
+    assertionFailure("Not Implemented")
+    return self
   }
   
   public func filter(predicate pred: NSPredicate) -> Query<T> {
@@ -61,35 +89,27 @@ public final class Query<T: NSManagedObject> {
     return self
   }
   
-  public func find(_:((key: String) -> (NSPredicate))) -> Query<T> {
-    return self
-  }
-  
-  public init() {
-    self.sortDescriptors = [NSSortDescriptor]()
-    self.fetchLimit = 0;
-    self.fetchOffset = 0
-    self.fetchBatchSize = 0
-    
-    let entityName = ""
-    fetchRequest = NSFetchRequest(entityName: entityName)
-  }
-  
   public convenience init(objectID: NSManagedObjectID) {
     self.init()
-    self.predicate = NSPredicate(format: "objectID == %@", objectID)
+    predicate = NSPredicate(format: "objectID == %@", objectID)
   }
   
-  public convenience init(identifier: String) {
+  public convenience init(key: String, identifier: String) {
     self.init()
-    self.predicate = NSPredicate(format: "identifier == %@", identifier)
+    predicate = NSPredicate(format: "@K == %@", key, identifier)
   }
   
-  public convenience init(key: String, value: String) {
-    self.init()
-    self.predicate = NSPredicate(format: "%@ == %@", key, value)
-  }
+  public init() { }
   
 }
+
+public func && (left: NSPredicate, right: NSPredicate) -> NSPredicate {
+  return NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [left, right])
+}
+
+public func || (left: NSPredicate, right: NSPredicate) -> NSPredicate {
+  return NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [left, right])
+}
+
 
 

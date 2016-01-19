@@ -10,21 +10,16 @@ import CoreData
 
 // MARK: Transaction
 
-public enum TransactionError: ErrorType {
-  case InvalidEntityName(String)
-  case EntityNotFound(String)
-  case InvalidThread
+public protocol WriteSupport {
+  
+  
+  
 }
 
 public class Transaction {
   
   private(set) var stack: Stack
   private(set) var context: NSManagedObjectContext
-  
-  public init() {
-    self.stack = Stack.defaultStack()
-    self.context = NSManagedObjectContext()
-  }
   
   init(stack: Stack, context: NSManagedObjectContext) {
     self.stack = stack
@@ -47,43 +42,45 @@ public class Transaction {
   
   public func insert<T: NSManagedObject>() throws -> T {
     guard let entityName = stack.entityNameForManagedObjectClass(T) where entityName != NSStringFromClass(NSManagedObject) else {
-      throw TransactionError.InvalidEntityName(NSStringFromClass(T))
+      throw StackError.EntityNameNotFoundForClass(T)
     }
     
-    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.stack.rootContext) as? T else {
-      throw TransactionError.EntityNotFound(entityName)
+    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: stack.currentThreadContext()) as? T else {
+      throw StackError.EntityNotFoundInStack(stack, entityName)
     }
     
     return object
   }
   
   public func insertOrFetch<T: NSManagedObject>(key: String, identifier: AnyObject) throws -> T {
-    return try insert([key: identifier]) as T
+    return try insert([key: identifier]) as! T
   }
   
   public func insertOrFetch<T: NSManagedObject>(key: String, identifiers: [AnyObject]) throws -> [T] {
     var objects = [T]()
     
     for id in identifiers {
-      let obj = try insertOrFetch(key, identifier: id) as T
-      objects.append(obj)
+      if let obj = try? insertOrFetch(key, identifier: id) as T {
+        objects.append(obj)
+      }
     }
     
     return objects
   }
   
-  public func insert<T: NSManagedObject>(attributes: [String: AnyObject]) throws -> T {
-    let object = try insert() as T
-    object.setValuesForKeysWithDictionary(attributes)
-    return object
+  public func insert<T: NSManagedObject>(attributes: [String: AnyObject]) throws -> T? {
+    if let object = try? insert() as T {
+      object.setValuesForKeysWithDictionary(attributes)
+      return object
+    }
+    
+    return nil
   }
   
-  public func delete<T>(objects objs: T...) throws {
-    throw TransactionError.InvalidThread
+  public func delete<T>(objects: T...) {
   }
   
-  public func delete<T>(objects: [T]) throws {
-    throw TransactionError.InvalidThread
+  public func delete<T>(objects objects: [T]) {
   }
   
 }

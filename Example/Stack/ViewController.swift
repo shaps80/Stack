@@ -18,10 +18,13 @@ class ViewController: UITableViewController {
     let stack = Stack.defaultStack()
     let query = Query<Friend>().fault(true).sort(byKey: "name", ascending: true)
     
-    let person = stack.fetch(query).first
-    print(person)
-    
     stack.write { (transaction) -> Void in
+      let friend = try! transaction.insert() as Friend
+      transaction.delete(friend)
+      
+      print(try! transaction.fetch(first: query))
+//      let (query, results) = try! transaction.fetch(query)
+      
       let person = try! transaction.insertOrFetch("name", identifier: "shaps") as Person
       print(person.name)
     }

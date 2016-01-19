@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		545722BB1C4E73960086D3AF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		546837C71C4D5B5A004DA140 /* Person+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 546837C51C4D5B5A004DA140 /* Person+CoreDataProperties.swift */; };
 		546837C81C4D5B5A004DA140 /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 546837C61C4D5B5A004DA140 /* Person.swift */; };
 		54C505A41C07335D004DB6BC /* Friend+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C505A21C07335D004DB6BC /* Friend+CoreDataProperties.swift */; };
 		54C505A51C07335D004DB6BC /* Friend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C505A31C07335D004DB6BC /* Friend.swift */; };
 		54C505A81C073385004DB6BC /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54C505A61C073385004DB6BC /* Model.xcdatamodeld */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
-		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
@@ -411,11 +411,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				54C505A41C07335D004DB6BC /* Friend+CoreDataProperties.swift in Sources */,
 				546837C71C4D5B5A004DA140 /* Person+CoreDataProperties.swift in Sources */,
 				54C505A81C073385004DB6BC /* Model.xcdatamodeld in Sources */,
 				546837C81C4D5B5A004DA140 /* Person.swift in Sources */,
+				545722BB1C4E73960086D3AF /* ViewController.swift in Sources */,
 				54C505A51C07335D004DB6BC /* Friend.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
