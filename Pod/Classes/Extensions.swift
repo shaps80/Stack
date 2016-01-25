@@ -18,14 +18,14 @@ extension NSFetchedResultsController {
   
 }
 
-public enum StackContextSaveResult: ErrorType {
-  case Success
-  case Failed(NSError)
-}
-
 extension NSManagedObjectContext {
   
-  func save(synchronous: Bool, completion: (StackContextSaveResult) -> ()) {
+  enum SaveResult: ErrorType {
+    case Success
+    case Failed(NSError)
+  }
+  
+  func save(synchronous: Bool, completion: (NSManagedObjectContext.SaveResult) -> ()) {
     let saveBlock: () -> () = { [unowned self] in
       if !self.hasChanges {
         completion(.Success)

@@ -39,7 +39,7 @@
 		546837C51C4D5B5A004DA140 /* Person+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Person+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		546837C61C4D5B5A004DA140 /* Person.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Person.swift; sourceTree = "<group>"; };
 		54C0FE9A1C4E754000A04C91 /* StackTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackTypes.swift; sourceTree = "<group>"; };
-		54C505881C073144004DB6BC /* NSFetchedResultsController+Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSFetchedResultsController+Stack.swift"; sourceTree = "<group>"; };
+		54C505881C073144004DB6BC /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		54C505891C073144004DB6BC /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		54C5058A1C073144004DB6BC /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		54C5058B1C073144004DB6BC /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
@@ -99,17 +99,17 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		54C505861C073134004DB6BC /* Classes */ = {
+		54C505861C073134004DB6BC /* Stack */ = {
 			isa = PBXGroup;
 			children = (
+				54C505891C073144004DB6BC /* Query.swift */,
 				54C5058A1C073144004DB6BC /* Stack.swift */,
 				54C505A91C073501004DB6BC /* StackConfiguration.swift */,
-				54C505891C073144004DB6BC /* Query.swift */,
 				54C5058B1C073144004DB6BC /* Transaction.swift */,
-				54C505881C073144004DB6BC /* NSFetchedResultsController+Stack.swift */,
 				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
+				54C505881C073144004DB6BC /* Extensions.swift */,
 			);
-			name = Classes;
+			name = Stack;
 			path = ../Pod/Classes;
 			sourceTree = "<group>";
 		};
@@ -139,8 +139,8 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				54C505861C073134004DB6BC /* Stack */,
 				54C505A11C073321004DB6BC /* Model */,
-				54C505861C073134004DB6BC /* Classes */,
 				607FACD21AFB9204008FA782 /* Example for Stack */,
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACE81AFB9204008FA782 /* Tests */,

@@ -21,7 +21,7 @@ class ViewController: DataViewController {
     Stack.configureDefaults { (config) -> () in
       
       // Stack supports various configurations, here we will setup a stack to use only the mainThread context for all operations
-      config.stackType = .ParentChild // .ManualMerge // .ParentChild
+      config.stackType = .ManualMerge // .MainThreadOnly // .ManualMerge
       
       // We can also define the persistence type
       config.persistenceType = .SQLite // .MemoryOnly // .Binary
@@ -70,7 +70,7 @@ class ViewController: DataViewController {
         let person = transaction.copy(person)
         
         // now we can delete it
-        transaction.delete(person)
+        try! transaction.delete(person)
         
         // when the transaction completes it will automatically persist for us -- updating the UI along with it
         print("Stack: Deleted -- \(person)")

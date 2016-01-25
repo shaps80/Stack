@@ -85,12 +85,16 @@ public class Transaction: Readable, Writable {
     return objects
   }
   
-  public func delete<T: NSManagedObject>(objects: T...) {
-    delete(objects: objects)
+  public func delete<T: NSManagedObject>(objects: T...) throws {
+    try delete(objects: objects)
   }
   
-  public func delete<T: NSManagedObject>(objects objects: [T]) {
+  public func delete<T: NSManagedObject>(objects objects: [T]) throws {
     for object in objects {
+      if object.managedObjectContext != _stack().currentThreadContext() {
+        throw StackError.DeleteFailed("An NSManagedObjectContext cannot delete objects in other contexts")
+      }
+      
       context.deleteObject(object)
     }
   }

@@ -14,6 +14,7 @@ public enum StackError: ErrorType {
   case InvalidResultType(AnyClass.Type)
   case FetchError(NSError?)
   case SaveFailed(NSError?)
+  case DeleteFailed(String)
 }
 
 public enum QueryResultType {
@@ -46,8 +47,8 @@ public protocol Writable {
   func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T
   func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]
 
-  func delete<T: NSManagedObject>(objects: T...)
-  func delete<T: NSManagedObject>(objects objects: [T])
+  func delete<T: NSManagedObject>(objects: T...) throws
+  func delete<T: NSManagedObject>(objects objects: [T]) throws
   
 }
 

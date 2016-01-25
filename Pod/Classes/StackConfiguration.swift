@@ -32,7 +32,13 @@ public final class StackConfiguration: CustomStringConvertible {
   
   public private(set) var name: String
   public var persistenceType: StackPersistenceType = .SQLite
-  public var stackType: StackType = .ParentChild
+  public var stackType: StackType = .ParentChild {
+    didSet {
+      if stackType == .ManualMerge {
+//        assertionFailure("This is not currently working!")
+      }
+    }
+  }
   
   public lazy var storeOptions: [NSObject : AnyObject] = {
     return [ NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true ]
