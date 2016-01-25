@@ -21,7 +21,7 @@ class ViewController: DataViewController {
     Stack.configureDefaults { (config) -> () in
       
       // Stack supports various configurations, here we will setup a stack to use only the mainThread context for all operations
-      config.stackType = .ManualMerge // .MainThreadOnly // .ManualMerge
+      config.stackType = .ManualMerge // .MainThreadOnly // .ParentChild
       
       // We can also define the persistence type
       config.persistenceType = .SQLite // .MemoryOnly // .Binary
@@ -63,7 +63,7 @@ class ViewController: DataViewController {
     let stack = Stack.defaultStack()
     let person = fetchedResultsController.objectAtIndexPath(indexPath) as! Person
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) { () -> Void in
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) { () -> Void in
       // In order to delete, we need to use a `write` transaction
       stack.write(sync: { (transaction) -> Void in
         // first we need to copy the object into the current transaction
@@ -75,7 +75,7 @@ class ViewController: DataViewController {
         // when the transaction completes it will automatically persist for us -- updating the UI along with it
         print("Stack: Deleted -- \(person)")
       })
-    }
+//    }
   }
 
 }

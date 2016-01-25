@@ -61,6 +61,10 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   
   func controllerWillChangeContent(controller: NSFetchedResultsController) {
     tableView.beginUpdates()
+    
+    if !NSThread.isMainThread() {
+      fatalError("Fetched Results Controller executed off the main thread!!")
+    }
   }
   
   func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
