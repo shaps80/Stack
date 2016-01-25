@@ -15,39 +15,21 @@ private let StackThreadContextKey = "stack_context"
 
 class StackContextHandler: NSObject {
   
-  unowned var context: NSManagedObjectContext
   unowned var stack: Stack
   
-  init(stack: Stack, context: NSManagedObjectContext) {
-    self.context = context
+  init(stack: Stack) {
     self.stack = stack
-    super.init()
-    NSNotificationCenter.defaultCenter().addObserver(self, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: context)
   }
   
   func contextDidSaveContext(note: NSNotification) {
     stack.contextDidSaveContext(note, contextHandler: self)
-    NSNotificationCenter.defaultCenter().removeObserver(self, name: "contextDidSaveContext:", object: context)
   }
   
-  override func isEqual(object: AnyObject?) -> Bool {
-    if let handler = object as? StackContextHandler {
-      return handler.context == self.context && handler.stack.configuration.name == self.stack.configuration.name
-    }
-    
-    return false
-  }
-  
-}
-
-func ==(lhs: StackContextHandler, rhs: StackContextHandler) -> Bool {
-  return lhs.isEqual(rhs)
 }
 
 public final class Stack: CustomStringConvertible, Readable {
   
-//  private var contextHandler: StackContextHandler?
-  private var contextHandlers = [StackContextHandler]()
+  private var contextHandler: StackContextHandler?
   
   public var description: String {
     return configuration.description
@@ -67,13 +49,7 @@ public final class Stack: CustomStringConvertible, Readable {
   
   private lazy var mainThreadContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
-    
-    if self.configuration.stackType == .ManualMerge {
-      context.persistentStoreCoordinator = self.coordinator
-    } else {
-      context.parentContext = self.rootContext
-    }
-    
+    context.parentContext = self.rootContext
     return context
   }()
   
@@ -91,8 +67,7 @@ public final class Stack: CustomStringConvertible, Readable {
     if configuration.stackType != .ManualMerge {
       context.parentContext = mainThreadContext
     } else {
-      context.persistentStoreCoordinator = coordinator
-      contextHandlers.append(StackContextHandler(stack: self, context: context))
+      context.parentContext = rootContext
     }
     
     NSThread.currentThread().threadDictionary[StackThreadContextKey] = context
@@ -153,6 +128,12 @@ public final class Stack: CustomStringConvertible, Readable {
     }
     
     self.configuration = config
+    contextHandler = StackContextHandler(stack: self)
+    NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: rootContext)
+  }
+  
+  deinit {
+    NSNotificationCenter.defaultCenter().removeObserver(contextHandler!, name: NSManagedObjectContextDidSaveNotification, object: rootContext)
   }
   
   func contextDidSaveContext(note: NSNotification, contextHandler: StackContextHandler) {
@@ -162,16 +143,12 @@ public final class Stack: CustomStringConvertible, Readable {
       if let updated = userInfo.objectForKey(NSUpdatedObjectsKey) as? Set<NSManagedObject> {
         for object in updated {
           do { try mainThreadContext.existingObjectWithID(object.objectID) } catch { }
-//          let mainThreadObject = mainThreadContext.objectWithID(object.objectID)
-//          mainThreadObject.willAccessValueForKey(nil)
         }
       }
     }
-    
-//    contextHandlers.removeAtIndex(contextHandlers.indexOf(contextHandler)!)
-    
+
     dispatch_async(dispatch_get_main_queue()) { () -> Void in
-     self.mainThreadContext.mergeChangesFromContextDidSaveNotification(note)
+      self.mainThreadContext.mergeChangesFromContextDidSaveNotification(note)
     }
   }
   
