@@ -10,13 +10,7 @@ import CoreData
 
 // MARK: Transaction
 
-public protocol WriteSupport {
-  
-  
-  
-}
-
-public class Transaction {
+public class Transaction: Readable, Writable {
   
   private(set) var stack: Stack
   private(set) var context: NSManagedObjectContext
@@ -26,18 +20,25 @@ public class Transaction {
     self.context = context
   }
   
-  public func copy<T>(object: T) -> T {
-    // mock
-    let p = NSManagedObject() as! T
-    return p
+  public func copy<T: NSManagedObject>(object: T) -> T {
+    let objects = copy([object]) as [T]
+    return objects.first!
   }
   
-  public func copy<T>(objects objs: T...) -> [T] {
-    return objs.map({ $0 })
+  public func copy<T: NSManagedObject>(objects objs: T...) -> [T] {
+    return copy(objs)
   }
   
-  public func copy<T>(objects: [T]) -> [T] {
-    return objects
+  public func copy<T: NSManagedObject>(objects: [T]) -> [T] {
+    var results = [T]()
+    
+    for object in objects {
+      if let obj = context.objectWithID(object.objectID) as? T {
+        results.append(obj)
+      }
+    }
+    
+    return results
   }
   
   public func insert<T: NSManagedObject>() throws -> T {
@@ -45,45 +46,54 @@ public class Transaction {
       throw StackError.EntityNameNotFoundForClass(T)
     }
     
-    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: stack.currentThreadContext()) as? T else {
+    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: _stack().currentThreadContext()) as? T else {
       throw StackError.EntityNotFoundInStack(stack, entityName)
     }
     
     return object
   }
   
-  public func insertOrFetch<T: NSManagedObject>(key: String, identifier: AnyObject) throws -> T {
-    return try insert([key: identifier]) as! T
+  public func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T {
+    let results = try insertOrFetch(key, identifiers: [identifier]) as [T]
+    return results.first!
   }
   
-  public func insertOrFetch<T: NSManagedObject>(key: String, identifiers: [AnyObject]) throws -> [T] {
-    var objects = [T]()
+  public func insertOrFetch<T : NSManagedObject, U : StackManagedKey>(key: String, identifiers: [U]) throws -> [T] {
+    let query = Query<T>(key: key, identifiers: identifiers)
+    let request = try fetchRequest(query)
     
-    for id in identifiers {
-      if let obj = try? insertOrFetch(key, identifier: id) as T {
-        objects.append(obj)
+    guard let results = try context.executeFetchRequest(request) as? [T] else {
+      throw StackError.FetchError(nil)
+    }
+    
+    if results.count == identifiers.count {
+      return results
+    }
+    
+    var objects = [T]()
+    if let existingIds = (results as NSArray).valueForKey(key) as? [U] {
+      for id in identifiers {
+        if !existingIds.contains(id) {
+          print("adding \(id)")
+          let result = try insert() as T
+          result.setValue(id, forKeyPath: key)
+          objects.append(result)
+        }
       }
     }
     
     return objects
   }
   
-  public func insert<T: NSManagedObject>(attributes: [String: AnyObject]) throws -> T? {
-    if let object = try? insert() as T {
-      object.setValuesForKeysWithDictionary(attributes)
-      return object
+  public func delete<T: NSManagedObject>(objects: T...) {
+    delete(objects: objects)
+  }
+  
+  public func delete<T: NSManagedObject>(objects objects: [T]) {
+    for object in objects {
+      context.deleteObject(object)
     }
-    
-    return nil
-  }
-  
-  public func delete<T>(objects: T...) {
-  }
-  
-  public func delete<T>(objects objects: [T]) {
   }
   
 }
-
-
 

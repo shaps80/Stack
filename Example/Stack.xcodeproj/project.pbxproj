@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		545722BB1C4E73960086D3AF /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
+		5456E6781C5584F300364348 /* StackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* StackViewController.swift */; };
+		5456E67A1C55B64500364348 /* DataViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5456E6791C55B64500364348 /* DataViewController.swift */; };
 		546837C71C4D5B5A004DA140 /* Person+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 546837C51C4D5B5A004DA140 /* Person+CoreDataProperties.swift */; };
 		546837C81C4D5B5A004DA140 /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = 546837C61C4D5B5A004DA140 /* Person.swift */; };
 		54C505A41C07335D004DB6BC /* Friend+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C505A21C07335D004DB6BC /* Friend+CoreDataProperties.swift */; };
@@ -34,8 +35,10 @@
 
 /* Begin PBXFileReference section */
 		0CEA01D8CFABE9CC249EB810 /* Pods_Stack_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Stack_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5456E6791C55B64500364348 /* DataViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewController.swift; sourceTree = "<group>"; };
 		546837C51C4D5B5A004DA140 /* Person+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Person+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		546837C61C4D5B5A004DA140 /* Person.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Person.swift; sourceTree = "<group>"; };
+		54C0FE9A1C4E754000A04C91 /* StackTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackTypes.swift; sourceTree = "<group>"; };
 		54C505881C073144004DB6BC /* NSFetchedResultsController+Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSFetchedResultsController+Stack.swift"; sourceTree = "<group>"; };
 		54C505891C073144004DB6BC /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
 		54C5058A1C073144004DB6BC /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
@@ -48,7 +51,7 @@
 		607FACD01AFB9204008FA782 /* Stack_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stack_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		607FACD71AFB9204008FA782 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		607FACD71AFB9204008FA782 /* StackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackViewController.swift; sourceTree = "<group>"; };
 		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -104,6 +107,7 @@
 				54C505891C073144004DB6BC /* Query.swift */,
 				54C5058B1C073144004DB6BC /* Transaction.swift */,
 				54C505881C073144004DB6BC /* NSFetchedResultsController+Stack.swift */,
+				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
 			);
 			name = Classes;
 			path = ../Pod/Classes;
@@ -159,7 +163,8 @@
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				607FACD71AFB9204008FA782 /* ViewController.swift */,
+				5456E6791C55B64500364348 /* DataViewController.swift */,
+				607FACD71AFB9204008FA782 /* StackViewController.swift */,
 				54C5058C1C0731C8004DB6BC /* Resources */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
@@ -415,7 +420,8 @@
 				546837C71C4D5B5A004DA140 /* Person+CoreDataProperties.swift in Sources */,
 				54C505A81C073385004DB6BC /* Model.xcdatamodeld in Sources */,
 				546837C81C4D5B5A004DA140 /* Person.swift in Sources */,
-				545722BB1C4E73960086D3AF /* ViewController.swift in Sources */,
+				5456E67A1C55B64500364348 /* DataViewController.swift in Sources */,
+				5456E6781C5584F300364348 /* StackViewController.swift in Sources */,
 				54C505A51C07335D004DB6BC /* Friend.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);

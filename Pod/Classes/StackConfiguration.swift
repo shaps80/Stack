@@ -9,24 +9,29 @@
 import CoreData
 
 public enum StackPersistenceType {
-  case CoreData
+  case SQLite
   case Binary
   case MemoryOnly
 }
 
 public enum StackType {
   case ParentChild
+  case MainThreadOnly
   case ManualMerge
 }
 
 public final class StackConfiguration: CustomStringConvertible {
   
-  public var description: String {
-    return "\n  name:\t\t\t\(name)\n  bundle:\t\t\(bundle.bundlePath)\n  storeURL:\t\t\(storeURL)\n  options:\t\t\(storeOptions)\n  type:\t\t\t\(stackType)\n"
+  public var description: String { return
+      "  name:\t\t\t\(name)" +
+      "\n  bundle:\t\t\(bundle.bundlePath)" +
+      "\n  storeURL:\t\t\(storeURL)" +
+      "\n  options:\t\t\(storeOptions)" +
+      "\n  type:\t\t\t\(stackType)"
   }
   
-  public var name: String
-  public var persistenceType: StackPersistenceType = .CoreData
+  public private(set) var name: String
+  public var persistenceType: StackPersistenceType = .SQLite
   public var stackType: StackType = .ParentChild
   
   public lazy var storeOptions: [NSObject : AnyObject] = {

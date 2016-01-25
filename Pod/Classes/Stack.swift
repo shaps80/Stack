@@ -9,15 +9,11 @@
 import UIKit
 import CoreData
 
-public enum StackError: ErrorType {
-  case EntityNameNotFoundForClass(AnyClass)
-  case EntityNotFoundInStack(Stack, String)
-  case InvalidResultType(AnyClass.Type)
-}
-
 // MARK: Stack
 
-public final class Stack: CustomStringConvertible {
+private let StackThreadContextKey = "stack_context"
+
+public final class Stack: CustomStringConvertible, Readable {
   
   public var description: String {
     return configuration.description
@@ -28,22 +24,38 @@ public final class Stack: CustomStringConvertible {
   private let coordinator: NSPersistentStoreCoordinator
   private let configuration: StackConfiguration
   
-  private lazy var rootContext: NSManagedObjectContext = {
+  lazy var rootContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
     context.persistentStoreCoordinator = self.coordinator
     return context
   }()
   
   
-  lazy var mainThreadContext: NSManagedObjectContext = {
+  private lazy var mainThreadContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
     context.parentContext = self.rootContext
     return context
   }()
   
   func currentThreadContext() -> NSManagedObjectContext {
+    if NSThread.isMainThread() || configuration.stackType == .MainThreadOnly {
+      return mainThreadContext
+    }
+    
+    if let context = NSThread.currentThread().threadDictionary[StackThreadContextKey] as? NSManagedObjectContext {
+      return context
+    }
+    
     let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-    context.parentContext = self.mainThreadContext
+    
+    if configuration.stackType != .ManualMerge {
+      context.parentContext = mainThreadContext
+    } else {
+      context.persistentStoreCoordinator = coordinator
+    }
+    
+    NSThread.currentThread().threadDictionary[StackThreadContextKey] = context
+    
     return context
   }
   
@@ -100,126 +112,88 @@ public final class Stack: CustomStringConvertible {
     }
     
     self.configuration = config
+    
+    if config.stackType == .ManualMerge {
+      NSNotificationCenter.defaultCenter().addObserver(self, selector: "mergeChanges:", name: NSManagedObjectContextDidSaveNotification, object: nil)
+    }
   }
   
+  deinit {
+    NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextDidSaveNotification, object: nil)
+  }
+  
+  func mergeChanges(note: NSNotification) {
+    if let info = note.userInfo {
+      let userInfo = NSDictionary(dictionary: info)
+      
+      if let updated = userInfo.objectForKey(NSUpdatedObjectsKey) as? Set<NSManagedObject> {
+        for object in updated {
+          do { try mainThreadContext.existingObjectWithID(object.objectID) } catch { }
+        }
+      }
+    }
+
+    mainThreadContext.mergeChangesFromContextDidSaveNotification(note)
+  }
+  
+  public func write(sync transaction: (transaction: Transaction) -> Void) {
+    let context = currentThreadContext()
+
+    context.performBlockAndWait({ [unowned self, context] () -> Void in
+      transaction(transaction: Transaction(stack: self, context: context))
+      context.save(true, completion: { (result) -> () in
+        if case let StackContextSaveResult.Failed(error) = result {
+          print("Stack: Write failed -- \(error)")
+        }
+      })
+    })
+  }
+  
+  public func write(async transaction: (transaction: Transaction) -> Void, completion: (() -> Void)?) {
+    let context = currentThreadContext()
+    
+    context.performBlock({ [unowned self, context] () -> Void in
+      transaction(transaction: Transaction(stack: self, context: context))
+      context.save(false, completion: { (result) -> () in
+        if case let StackContextSaveResult.Failed(error) = result {
+          print("Stack: Write failed -- \(error)")
+        }
+        
+        completion?()
+      })
+    })
+  }
 }
 
 // MARK: Default Stack
 
 extension Stack {
   
-  private static let name = "Default"
+  private static let DefaultName = "Default"
   
   public static func defaultStack() -> Stack {
-    if let stack = Stack.stack(named: name) {
+    if let stack = Stack.stack(named: DefaultName) {
       return stack
     }
     
     let stack = Stack(config: DefaultConfiguration)
-    stacks[name] = stack
+    stacks[DefaultName] = stack
     return stack
   }
   
   private static var DefaultConfiguration: StackConfiguration = {
-    return StackConfiguration(name: name)
+    return StackConfiguration(name: DefaultName)
   }()
   
   public class func configureDefaults(configure: (_: StackConfiguration) -> ()) {
-    let configuration = StackConfiguration(name: name)
-    
-    configuration.storeOptions = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
-    configuration.storeURL = NSURL(string: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true).first!)!
-    configuration.persistenceType = .MemoryOnly
-    configuration.stackType = .ParentChild
-    configuration.name = "My Stack" // becomes ./$STORE_URL/$NAME.sqlite
-    
+    let configuration = StackConfiguration(name: DefaultName)
     configure(configuration)
     DefaultConfiguration = configuration
   }
   
-}
-
-// MARK: Queries -- Makes Transaction's and Stack itself support querying
-
-protocol StackSupport {
-  func _stack() -> Stack
-}
-
-extension Stack: ReadSupport, StackSupport {
-  
-  func _stack() -> Stack {
-    return self
-  }
-  
-  public func write(sync transaction: (transaction: Transaction) -> Void) {
-    transaction(transaction: Transaction(stack: self, context: self.rootContext))
-  }
-  
-  public func write(async transaction: (transaction: Transaction) -> Void, completion: (() -> Void)?) {
-    transaction(transaction: Transaction(stack: self, context: self.rootContext))
-    completion?()
-  }
   
 }
 
-extension Transaction: ReadSupport, StackSupport {
-  
-  func _stack() -> Stack {
-    return self.stack
-  }
-  
-}
 
-public protocol ReadSupport {
-  
-  func count<T: NSManagedObject>(query: Query<T>) throws -> Int
-  
-  func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
-  func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
-  func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
-  
-}
 
-extension ReadSupport {
- 
-  func _stack() -> Stack { return Stack.defaultStack() }
-  
-  public func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T] {
-    guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
-      throw StackError.EntityNameNotFoundForClass(T)
-    }
-    
-    guard let request = query.fetchRequestForEntityNamed(entityName) else {
-      throw StackError.EntityNotFoundInStack(_stack(), entityName)
-    }
-    
-    guard let results = try _stack().currentThreadContext().executeFetchRequest(request) as? [T] else {
-      throw StackError.InvalidResultType(T.Type)
-    }
-    
-    return results
-  }
-  
-  public func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T? {
-    return try fetch(query).first
-  }
-  
-  public func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T? {
-    return try fetch(query).first
-  }
-  
-  public func count<T: NSManagedObject>(query: Query<T>) throws -> Int {
-    guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
-      throw StackError.EntityNameNotFoundForClass(T)
-    }
-    
-    guard let request = query.fetchRequestForEntityNamed(entityName) else {
-      throw StackError.EntityNotFoundInStack(_stack(), entityName)
-    }
-    
-    var error: NSError?
-    return _stack().currentThreadContext().countForFetchRequest(request, error: &error)
-  }
-  
-}
 
