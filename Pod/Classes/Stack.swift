@@ -6,7 +6,6 @@
 //  Copyright © 2015 Shaps Mohsenin. All rights reserved.
 //
 
-import UIKit
 import CoreData
 
 // MARK: Stack
