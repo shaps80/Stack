@@ -8,18 +8,31 @@
 
 import CoreData
 
-// MARK: Transaction
-
+/// A transaction provides a type-safe implementation for performing any write action to CoreData
 public class Transaction: Readable, Writable {
   
+  /// Returns the stack associated with this transaction
   private(set) var stack: Stack
+  
+  /// Returns the context associated with this transaction
   private(set) var context: NSManagedObjectContext
   
+  /**
+   Internal: Initializes a new transaction for the specified Stack
+   
+   - parameter stack:   The stack this transaction will be applied to
+   - parameter context: The context this transaction will be applied to
+   
+   - returns: A new Transaction
+   */
   init(stack: Stack, context: NSManagedObjectContext) {
     self.stack = stack
     self.context = context
   }
-    
+  
+  /**
+   Inserts a new entity of the specified class. Usage: `insert() as EntityName`
+   */
   public func insert<T: NSManagedObject>() throws -> T {
     guard let entityName = stack.entityNameForManagedObjectClass(T) where entityName != NSStringFromClass(NSManagedObject) else {
       throw StackError.EntityNameNotFoundForClass(T)
@@ -32,12 +45,18 @@ public class Transaction: Readable, Writable {
     return object as T
   }
   
-  public func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T {
-    let results = try insertOrFetch(key, identifiers: [identifier]) as [T]
+  /**
+   Fetches (or inserts if not found) an entity with the specified identifier
+   */
+  public func fetchOrInsert<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T {
+    let results = try fetchOrInsert(key, identifiers: [identifier]) as [T]
     return results.first!
   }
   
-  public func insertOrFetch<T : NSManagedObject, U : StackManagedKey>(key: String, identifiers: [U]) throws -> [T] {
+  /**
+   Fetches (or inserts if not found) entities with the specified identifiers
+   */
+  public func fetchOrInsert<T : NSManagedObject, U : StackManagedKey>(key: String, identifiers: [U]) throws -> [T] {
     let query = Query<T>(key: key, identifiers: identifiers)
     let request = try fetchRequest(query)
     
@@ -64,10 +83,16 @@ public class Transaction: Readable, Writable {
     return objects as [T]
   }
   
+  /**
+   Deletes the specified objects
+   */
   public func delete<T: NSManagedObject>(objects: T...) throws {
     try delete(objects: objects)
   }
   
+  /**
+   Deletes the specified objects
+   */
   public func delete<T: NSManagedObject>(objects objects: [T]) throws {
     for object in objects {
       context.deleteObject(object)

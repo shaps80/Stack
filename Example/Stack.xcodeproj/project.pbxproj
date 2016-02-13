@@ -38,6 +38,7 @@
 		5456E6791C55B64500364348 /* DataViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewController.swift; sourceTree = "<group>"; };
 		546837C51C4D5B5A004DA140 /* Person+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Person+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		546837C61C4D5B5A004DA140 /* Person.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Person.swift; sourceTree = "<group>"; };
+		547BC24D1C6FCD6800BB4B2B /* Readable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Readable.swift; sourceTree = "<group>"; };
 		54C0FE9A1C4E754000A04C91 /* StackTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StackTypes.swift; sourceTree = "<group>"; };
 		54C505881C073144004DB6BC /* Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Additions.swift; sourceTree = "<group>"; };
 		54C505891C073144004DB6BC /* Query.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Query.swift; sourceTree = "<group>"; };
@@ -105,9 +106,10 @@
 				54C505891C073144004DB6BC /* Query.swift */,
 				54C5058A1C073144004DB6BC /* Stack.swift */,
 				54C505A91C073501004DB6BC /* StackConfiguration.swift */,
-				54C5058B1C073144004DB6BC /* Transaction.swift */,
-				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
 				54C505881C073144004DB6BC /* Additions.swift */,
+				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
+				54C5058B1C073144004DB6BC /* Transaction.swift */,
+				547BC24D1C6FCD6800BB4B2B /* Readable.swift */,
 			);
 			name = Stack;
 			path = ../Pod/Classes;

@@ -1,5 +1,5 @@
 PODS:
-  - Stack (1.0.0)
+  - Stack (2.0.0)
 
 DEPENDENCIES:
   - Stack (from `../`)
@@ -9,6 +9,6 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  Stack: 9860e8d84d27e2155b67ae85305aaeb13794cc2f
+  Stack: b2a77662cf52a7f3449812ee259613cd013f5296
 
 COCOAPODS: 0.39.0

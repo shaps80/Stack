@@ -8,10 +8,9 @@
 
 import CoreData
 
-// MARK: Stack
-
 private let StackThreadContextKey = "stack_context"
 
+/// This class is responsible for listening for NSNotification's on context changes. It exists purely as a convenience, so that we don't have to subclass NSObject on our Stack!
 class StackContextHandler: NSObject {
   
   unowned var stack: Stack
@@ -20,32 +19,41 @@ class StackContextHandler: NSObject {
     self.stack = stack
   }
   
+  // Called when an NSManagedObjectContext posts changes
   func contextDidSaveContext(note: NSNotification) {
     stack.contextDidSaveContext(note, contextHandler: self)
   }
   
 }
 
+/// A Stack is a CoreData wrapper that provides a type-safe implementation for reading and writing to CoreData
 public final class Stack: CustomStringConvertible, Readable {
   
+  /// The context handler that will listen for notifications. Only used when stackType = .ManualMerge
   private var contextHandler: StackContextHandler?
   
+  /// Returns a string representation of the Stack's configuration
   public var description: String {
     return configuration.description
   }
   
+  /// Holds onto the various Stacks in your application (1 or more)
   private static var stacks = { return [String: Stack]() }()
   
+  /// The persistent coordinator associated with this stack
   private let coordinator: NSPersistentStoreCoordinator
+  
+  /// The configuration associated with this stack
   private let configuration: StackConfiguration
   
+  /// The root context. Used only when stackType != .ManualMerge
   lazy var rootContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
     context.persistentStoreCoordinator = self.coordinator
     return context
   }()
   
-  
+  /// The main thread context.
   private lazy var mainContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
     if self.configuration.stackType == .ManualMerge {
@@ -57,6 +65,11 @@ public final class Stack: CustomStringConvertible, Readable {
     return context
   }()
   
+  /**
+   Returns a context associated with the current thread. This function may return an existing context, however if none exist, it will create one, add it to the threadDictionary and return it
+   
+   - returns: An NSManagedObjectContext that can be used on the current thread
+   */
   func currentThreadContext() -> NSManagedObjectContext {
     if NSThread.isMainThread() || configuration.stackType == .MainThreadOnly {
       return mainContext
@@ -79,6 +92,12 @@ public final class Stack: CustomStringConvertible, Readable {
     return context
   }
   
+  /**
+   Adds a new Stack
+   
+   - parameter name:      The name for this stack. Must be unique!
+   - parameter configure: The configuration to apply to this Stack
+   */
   public class func add(name: String, configure: ((_: StackConfiguration) -> ())?) {
     let config = StackConfiguration(name: name)
     configure?(config)
@@ -87,11 +106,18 @@ public final class Stack: CustomStringConvertible, Readable {
     stacks[name] = stack
   }
   
-  func entityNameForManagedObjectClass(objectClass: AnyClass) -> String? {
+  /**
+   Returns the entity name associated with the specified NSManagedObject class
+   
+   - parameter objectClass: The object
+   
+   - returns: The entity name for this managedObject class or nil if not found
+   */
+  func entityNameForManagedObjectClass(managedObjectClass: AnyClass) -> String? {
     let entities = coordinator.managedObjectModel.entitiesByName.values
     
     for entity in entities {
-      if entity.managedObjectClassName == NSStringFromClass(objectClass) {
+      if entity.managedObjectClassName == "\(managedObjectClass)" {
         return entity.name
       }
     }
@@ -111,6 +137,8 @@ public final class Stack: CustomStringConvertible, Readable {
   }
   
   private init(config: StackConfiguration) {
+    self.configuration = config
+    
     let model = NSManagedObjectModel.mergedModelFromBundles(nil)
     precondition(model != nil, "Stack: A valid NSManagedObjectModel must be provided!")
     coordinator = NSPersistentStoreCoordinator(managedObjectModel: model!)
@@ -127,7 +155,7 @@ public final class Stack: CustomStringConvertible, Readable {
         storeType = NSSQLiteStoreType
       }
       
-      let filename = NSBundle.mainBundle().infoDictionary?["CFBundleName"] as? String ?? "Stack"
+      let filename = config.name
       let pathExtension = config.persistenceType == .SQLite ? ".sqlite" : ".bin"
       let path = NSURL(string: filename + pathExtension, relativeToURL: config.storeURL)
       try coordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: path, options: config.storeOptions)
@@ -135,9 +163,7 @@ public final class Stack: CustomStringConvertible, Readable {
       print("Unable to add a persistent store for configuration: \(config)")
     }
     
-    self.configuration = config
-    
-    if configuration.stackType == .ManualMerge {
+    if config.stackType == .ManualMerge {
       contextHandler = StackContextHandler(stack: self)
       NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: nil)
     }
@@ -169,7 +195,7 @@ public final class Stack: CustomStringConvertible, Readable {
     }
   }
   
-  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)? = nil) {
+  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)?) {
     let block: () -> () = { [unowned self] in
       do {
         try transaction(transaction: Transaction(stack: self, context: self.currentThreadContext()))
@@ -188,6 +214,12 @@ public final class Stack: CustomStringConvertible, Readable {
 extension Stack {
   
 #if os(OSX)
+  
+  /**
+  Provided as a convenience for OSX only -- since a lot of bindings rely on having access to an NSManagedObjectContext
+  
+  - returns: The NSManagedObjectContext for use ONLY on the main queue
+  */
   public func mainThreadContext() -> NSManagedObjectContext {
     return mainContext
   }
@@ -199,8 +231,14 @@ extension Stack {
 
 extension Stack {
   
+  /// Returns the default Stack name
   private static let DefaultName = "Default"
   
+  /**
+   Returns a default Stack instance that uses the default configuration. You can modify the configuration by calling Stack.configureDefaults() early in your applications lifecycle
+   
+   - returns: The default Stack
+   */
   public static func defaultStack() -> Stack {
     if let stack = Stack.stack(named: DefaultName) {
       return stack
@@ -211,10 +249,16 @@ extension Stack {
     return stack
   }
   
+  /// Private: Returns the default Stack configuration
   private static var DefaultConfiguration: StackConfiguration = {
     return StackConfiguration(name: DefaultName)
   }()
   
+  /**
+   Provides a convenience function for configuring the default Stack before its initialized
+   
+   - parameter configure: The configuration to apply
+   */
   public class func configureDefaults(configure: (_: StackConfiguration) -> ()) {
     let configuration = StackConfiguration(name: DefaultName)
     configure(configuration)

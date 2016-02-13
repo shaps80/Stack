@@ -8,68 +8,184 @@
 
 import CoreData
 
+/**
+ *  Provides a protocol for any class that supports Reading from a Stack
+ */
+public protocol Readable: StackSupport {
+  
+  /**
+   Copies the specified object into the current thread's context and returns it to the caller
+   
+   - parameter object: The object to copy
+   
+   - returns: The newly copied object
+   */
+  func copy<T: NSManagedObject>(object: T) -> T
+  
+  /**
+   Copies the specified objects into the current thread's context and returns them to the caller
+   
+   - parameter objs: The objects to copy
+   
+   - returns: The newly copied objects
+   */
+  func copy<T: NSManagedObject>(objects objs: T...) -> [T]
+  
+  /**
+   Copies the specified objects into the current thread's context and returns them to the caller
+   
+   - parameter objects: The objects to copy
+   
+   - returns: The newly copied objects
+   */
+  func copy<T: NSManagedObject>(objects: [T]) -> [T]
+  
+  /**
+   Returns the number of results that would be returned if a fetch was performed using the specified query
+   
+   - parameter query: The query to perform
+   
+   - throws: An error will be thrown if the query cannot be performed
+   
+   - returns: The number of results
+   */
+  func count<T: NSManagedObject>(query: Query<T>) throws -> Int
+  
+  /**
+   Performs a fetch using the specified query and returns the results to the caller
+   
+   - parameter query: The query to perform
+   
+   - throws: An eror will be thrown if the query cannot be performed
+   
+   - returns: The resulting objects or nil
+   */
+  func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
+  
+  /**
+   Performs a fetch using the specified query and returns the first result
+   
+   - parameter query: The query to perform
+   
+   - throws: An error will be thrown is the query cannot be performed
+   
+   - returns: The resulting object or nil
+   */
+  func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
+  
+  /**
+   Performs a fetch using the specified query and returns the last result
+   
+   - parameter query: The query to perform
+   
+   - throws: An error will be thrown is the query cannot be performed
+   
+   - returns: The resulting object or nil
+   */
+  func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
+  
+  /**
+   Performs a fetch using the specified NSManagedObjectID
+   
+   - parameter objectID: The objectID to use for this fetch
+   
+   - throws: An error will be thrown if the query cannot be performed
+   
+   - returns: The resulting object or nil
+   */
+  func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T?
+  
+}
+
+/**
+ *  Provides a protocol for any class that supports Writing to a Stack
+ */
+public protocol Writable {
+  
+  /**
+   Inserts a new entity of the specified class. Usage: `insert() as EntityName`
+   */
+  func insert<T: NSManagedObject>() throws -> T
+  
+  /**
+   Fetches (or inserts if not found) an entity with the specified identifier
+   */
+  func fetchOrInsert<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T
+  
+  /**
+   Fetches (or inserts if not found) entities with the specified identifiers
+   */
+  func fetchOrInsert<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]
+
+  /**
+   Deletes the specified objects
+   */
+  func delete<T: NSManagedObject>(objects: T...) throws
+  
+  /**
+   Deletes the specified objects
+   */
+  func delete<T: NSManagedObject>(objects objects: [T]) throws
+  
+}
+
+// MARK: Error Handling
+
+/**
+Used throughout Stack to provide finer grained error handling
+
+- EntityNameNotFoundForClass: The entity name you queried, couldn't be located for the specified class type
+- EntityNotFoundInStack:      The entity could not be found in Stack. Generally indicates your class no longer maps to a valid entity in your model
+- InvalidResultType:          The result type expected from a fetch request was invalid
+- FetchError:                 A generic error occurred
+*/
 public enum StackError: ErrorType {
   case EntityNameNotFoundForClass(AnyClass)
   case EntityNotFoundInStack(Stack, String)
   case InvalidResultType(AnyClass.Type)
   case FetchError(NSError?)
-  case WriteFailed(NSError?)
-  case DeleteFailed(String)
 }
 
-public enum StackWriteResult: ErrorType {
-  case Success
-  case Failed(NSError?)
-}
+// MARK: NSManagedObject Identifiers
 
-public enum QueryResultType {
-  case ManagedObjects
-  case ManagedObjectIDs
-  case Dictionaries
-  
-  func toFetchRequestResultType() -> NSFetchRequestResultType {
-    switch self {
-    case .ManagedObjects:
-      return .ManagedObjectResultType
-    case .Dictionaries:
-      return .DictionaryResultType
-    case .ManagedObjectIDs:
-      return .ManagedObjectIDResultType
-    }
-  }
-}
 
+/**
+ *  Defines a protocol that all NSManagedObject key's must conform to in order to be used as an identifier
+ */
 public protocol StackManagedKey: NSObjectProtocol, Equatable, Hashable, CVarArgType { }
-extension NSObject: StackManagedKey { }
+extension NSObject: StackManagedKey { } // adds support for all NSObject's to be used as a StackManagedKey
 
-public protocol Writable {
-  
-  func insert<T: NSManagedObject>() throws -> T
-  func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T
-  func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]
+/**
+*  Defines a protocol that all
+*/
+public protocol StackManagedObject { }
+extension NSManagedObject: StackManagedObject { }
 
-  func delete<T: NSManagedObject>(objects: T...) throws
-  func delete<T: NSManagedObject>(objects objects: [T]) throws
-  
-}
 
-public protocol Readable: StackSupport {
+// MARK: Stack Support
+
+
+/**
+ *  Classes conforming to this protocol can provide access to a Stack
+ */
+public protocol StackSupport {
   
-  func copy<T: NSManagedObject>(object: T) -> T
-  func copy<T: NSManagedObject>(objects objs: T...) -> [T]
-  func copy<T: NSManagedObject>(objects: [T]) -> [T]
-  
-  func count<T: NSManagedObject>(query: Query<T>) throws -> Int
-  
-  func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
-  func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
-  func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
-  func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T?
+  /**
+   Provides internal access to the stack.
+   
+   - returns: The stack associated with the receiver
+   */
+  func _stack() -> Stack
   
 }
 
 extension Readable where Self: Stack {
-  
+
+  /**
+   Provides stack support for all classes conforming to Readable
+   
+   - returns: The stack associated with the reciever
+   */
   public func _stack() -> Stack {
     return self
   }
@@ -78,95 +194,14 @@ extension Readable where Self: Stack {
 
 extension Readable where Self: Transaction {
   
+  /**
+   Provides stack support for all classes conforming to Readable
+   
+   - returns: The stack associated with the reciever
+   */
   public func _stack() -> Stack {
     return self.stack
   }
   
 }
 
-extension Readable {
-  
-  public func copy<T: NSManagedObject>(object: T) -> T {
-    let objects = copy([object]) as [T]
-    return objects.first!
-  }
-  
-  public func copy<T: NSManagedObject>(objects objs: T...) -> [T] {
-    return copy(objs)
-  }
-  
-  public func copy<T: NSManagedObject>(objects: [T]) -> [T] {
-    var results = [T]()
-    
-    for object in objects {
-      if object.managedObjectContext == _stack().currentThreadContext() {
-        results.append(object)
-      } else {
-        if let obj = _stack().currentThreadContext().objectWithID(object.objectID) as? T {
-          results.append(obj)
-        }
-      }
-    }
-    
-    return results
-  }
-  
-  public func count<T: NSManagedObject>(query: Query<T>) throws -> Int {
-    let request = try fetchRequest(query)
-    var error: NSError?
-    let count = _stack().currentThreadContext().countForFetchRequest(request, error: &error)
-    
-    if let error = error {
-      throw StackError.FetchError(error)
-    }
-    
-    return count
-  }
-  
-  public func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T? {
-    let stack = _stack()
-    let context = stack.currentThreadContext()
-    
-    return try context.existingObjectWithID(objectID) as? T
-  }
-  
-  public func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T] {
-    let request = try fetchRequest(query)
-
-    let stack = _stack()
-    let context = stack.currentThreadContext()
-
-    guard let results = try context.executeFetchRequest(request) as? [T] else {
-      throw StackError.InvalidResultType(T.Type)
-    }
-    
-    return results
-  }
-  
-  public func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T? {
-    return try fetch(query).first
-  }
-  
-  public func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T? {
-    return try fetch(query).first
-  }
-  
-  func fetchRequest<T: NSManagedObject>(query: Query<T>) throws -> NSFetchRequest {
-    guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
-      throw StackError.EntityNameNotFoundForClass(T)
-    }
-    
-    guard let request = query.fetchRequestForEntityNamed(entityName) else {
-      throw StackError.EntityNotFoundInStack(_stack(), entityName)
-    }
-
-    return request
-  }
-  
-}
-
-public protocol StackSupport {
-  
-  func _stack() -> Stack
-  
-}
