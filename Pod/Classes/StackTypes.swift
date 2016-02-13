@@ -1,10 +1,27 @@
-//
-//  StackTypes.swift
-//  Stack
-//
-//  Created by Shaps Mohsenin on 19/01/2016.
-//  Copyright © 2016 CocoaPods. All rights reserved.
-//
+/*
+  Copyright © 2015 Shaps Mohsenin. All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY SHAPS MOHSENIN `AS IS' AND ANY EXPRESS OR
+  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+  EVENT SHALL THE APP BUSINESS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import CoreData
 
@@ -15,85 +32,38 @@ public protocol Readable: StackSupport {
   
   /**
    Copies the specified object into the current thread's context and returns it to the caller
-   
-   - parameter object: The object to copy
-   
-   - returns: The newly copied object
    */
   func copy<T: NSManagedObject>(object: T) -> T
   
   /**
    Copies the specified objects into the current thread's context and returns them to the caller
-   
-   - parameter objs: The objects to copy
-   
-   - returns: The newly copied objects
    */
   func copy<T: NSManagedObject>(objects objs: T...) -> [T]
   
   /**
    Copies the specified objects into the current thread's context and returns them to the caller
-   
-   - parameter objects: The objects to copy
-   
-   - returns: The newly copied objects
    */
   func copy<T: NSManagedObject>(objects: [T]) -> [T]
   
   /**
    Returns the number of results that would be returned if a fetch was performed using the specified query
-   
-   - parameter query: The query to perform
-   
-   - throws: An error will be thrown if the query cannot be performed
-   
-   - returns: The number of results
    */
   func count<T: NSManagedObject>(query: Query<T>) throws -> Int
   
   /**
    Performs a fetch using the specified query and returns the results to the caller
-   
-   - parameter query: The query to perform
-   
-   - throws: An eror will be thrown if the query cannot be performed
-   
-   - returns: The resulting objects or nil
    */
   func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
   
   /**
    Performs a fetch using the specified query and returns the first result
-   
-   - parameter query: The query to perform
-   
-   - throws: An error will be thrown is the query cannot be performed
-   
-   - returns: The resulting object or nil
    */
   func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
   
   /**
    Performs a fetch using the specified query and returns the last result
-   
-   - parameter query: The query to perform
-   
-   - throws: An error will be thrown is the query cannot be performed
-   
-   - returns: The resulting object or nil
    */
   func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
-  
-  /**
-   Performs a fetch using the specified NSManagedObjectID
-   
-   - parameter objectID: The objectID to use for this fetch
-   
-   - throws: An error will be thrown if the query cannot be performed
-   
-   - returns: The resulting object or nil
-   */
-  func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T?
   
 }
 
@@ -116,6 +86,11 @@ public protocol Writable {
    Fetches (or inserts if not found) entities with the specified identifiers
    */
   func fetchOrInsert<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]
+  
+  /**
+   Performs a fetch using the specified NSManagedObjectID
+   */
+  func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T?
 
   /**
    Deletes the specified objects
@@ -153,7 +128,7 @@ public enum StackError: ErrorType {
  *  Defines a protocol that all NSManagedObject key's must conform to in order to be used as an identifier
  */
 public protocol StackManagedKey: NSObjectProtocol, Equatable, Hashable, CVarArgType { }
-extension NSObject: StackManagedKey { } // adds support for all NSObject's to be used as a StackManagedKey
+extension NSObject: StackManagedKey { }
 
 /**
 *  Defines a protocol that all
@@ -172,8 +147,6 @@ public protocol StackSupport {
   
   /**
    Provides internal access to the stack.
-   
-   - returns: The stack associated with the receiver
    */
   func _stack() -> Stack
   
@@ -183,8 +156,6 @@ extension Readable where Self: Stack {
 
   /**
    Provides stack support for all classes conforming to Readable
-   
-   - returns: The stack associated with the reciever
    */
   public func _stack() -> Stack {
     return self
@@ -196,8 +167,6 @@ extension Readable where Self: Transaction {
   
   /**
    Provides stack support for all classes conforming to Readable
-   
-   - returns: The stack associated with the reciever
    */
   public func _stack() -> Stack {
     return self.stack
