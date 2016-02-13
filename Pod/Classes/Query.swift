@@ -10,6 +10,11 @@
 import Foundation
 import CoreData
 
+public enum SortDirection {
+  case Ascending
+  case Descending
+}
+
 public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStringConvertible {
   
   public var description: String {
@@ -161,9 +166,18 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
     return self
   }
   
-  public func sort(byKey key: String, ascending: Bool) -> Query<T> {
-    let sortDescriptor = NSSortDescriptor(key: key, ascending: ascending)
+  public func sort(byKey key: String, direction: SortDirection) -> Query<T> {
+    let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .Ascending)
     sortDescriptors.append(sortDescriptor)
+    return self
+  }
+  
+  public func sort(byKeys keys: [String: SortDirection]) -> Query<T> {
+    for (key, direction) in keys {
+      let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .Ascending)
+      sortDescriptors.append(sortDescriptor)
+    }
+    
     return self
   }
   
@@ -176,13 +190,18 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
     self.predicate = pred
     return self
   }
+  
+  public func filter(format: String, _ args: AnyObject...) -> Query<T> {
+    self.predicate = NSPredicate(format: format, argumentArray: args)
+    return self
+  }
     
-  public convenience init<T: StackManagedKey>(key: String, identifier: T) {
+  public convenience init<ID: StackManagedKey>(key: String, identifier: ID) {
     self.init()
     predicate = NSPredicate(format: "%K == %@", key, identifier)
   }
   
-  public convenience init<T: StackManagedKey>(key: String, identifiers: [T]) {
+  public convenience init<IDs: StackManagedKey>(key: String, identifiers: [IDs]) {
     self.init()
     predicate = NSPredicate(format: "%K IN %@", key, identifiers)
   }

@@ -8,7 +8,7 @@
 
 import CoreData
 
-public enum StackPersistenceType {
+public enum StackPersistenceType: String {
   case SQLite
   case Binary
   case MemoryOnly

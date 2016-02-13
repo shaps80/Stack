@@ -11,7 +11,7 @@ import CoreData
 extension NSFetchedResultsController {
   
   public convenience init<T: NSManagedObject>(stack: Stack, query: Query<T>, sectionNameKeyPath: String? = nil, cacheName: String? = nil) throws {
-    assert(NSThread.isMainThread())
+    precondition(NSThread.isMainThread(), "You must ONLY create an NSFetchedResultsController from the Main Thread")
     let request = try stack.fetchRequest(query)
     self.init(fetchRequest: request, managedObjectContext: stack.currentThreadContext(), sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
   }
@@ -20,29 +20,24 @@ extension NSFetchedResultsController {
 
 extension NSManagedObjectContext {
   
-  enum SaveResult: ErrorType {
-    case Success
-    case Failed(NSError)
-  }
-  
-  func save(synchronous: Bool, completion: (NSManagedObjectContext.SaveResult) -> ()) {
+  func save(synchronous: Bool, completion: ((NSError?) -> ())?) {
     let saveBlock: () -> () = { [unowned self] in
       if !self.hasChanges {
-        completion(.Success)
+        completion?(nil)
         return
       }
       
       do {
         try self.save()
       } catch {
-        completion(.Failed(error as NSError))
+        completion?(error as NSError)
         return
       }
       
       if self.parentContext != nil {
         self.parentContext?.save(synchronous, completion: completion)
       } else {
-        completion(.Success)
+        completion?(nil)
       }
     }
     

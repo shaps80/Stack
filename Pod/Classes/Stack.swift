@@ -48,7 +48,12 @@ public final class Stack: CustomStringConvertible, Readable {
   
   private lazy var mainThreadContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
-    context.parentContext = self.rootContext
+    if self.configuration.stackType == .ManualMerge {
+      context.persistentStoreCoordinator = self.coordinator
+    } else {
+      context.parentContext = self.rootContext
+    }
+    
     return context
   }()
   
@@ -63,14 +68,14 @@ public final class Stack: CustomStringConvertible, Readable {
     
     let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
     
-    if configuration.stackType != .ManualMerge {
+    switch configuration.stackType {
+    case .ParentChild:
       context.parentContext = mainThreadContext
-    } else {
-      context.parentContext = rootContext
+    default:
+      context.persistentStoreCoordinator = coordinator
     }
     
     NSThread.currentThread().threadDictionary[StackThreadContextKey] = context
-    
     return context
   }
   
@@ -107,6 +112,7 @@ public final class Stack: CustomStringConvertible, Readable {
   
   private init(config: StackConfiguration) {
     let model = NSManagedObjectModel.mergedModelFromBundles(nil)
+    precondition(model != nil, "Stack: A valid NSManagedObjectModel must be provided!")
     coordinator = NSPersistentStoreCoordinator(managedObjectModel: model!)
     
     do {
@@ -121,21 +127,33 @@ public final class Stack: CustomStringConvertible, Readable {
         storeType = NSSQLiteStoreType
       }
       
-      try coordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: config.storeURL, options: config.storeOptions)
+      let filename = NSBundle.mainBundle().infoDictionary?["CFBundleName"] as? String ?? "Stack"
+      let pathExtension = config.persistenceType == .SQLite ? ".sqlite" : ".bin"
+      let path = NSURL(string: filename + pathExtension, relativeToURL: config.storeURL)
+      try coordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: path, options: config.storeOptions)
     } catch {
       print("Unable to add a persistent store for configuration: \(config)")
     }
     
     self.configuration = config
-    contextHandler = StackContextHandler(stack: self)
-    NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: rootContext)
+    
+    if configuration.stackType == .ManualMerge {
+      contextHandler = StackContextHandler(stack: self)
+      NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: nil)
+    }
   }
   
   deinit {
-    NSNotificationCenter.defaultCenter().removeObserver(contextHandler!, name: NSManagedObjectContextDidSaveNotification, object: rootContext)
+    if configuration.stackType == .ManualMerge {
+      NSNotificationCenter.defaultCenter().removeObserver(contextHandler!, name: NSManagedObjectContextDidSaveNotification, object: rootContext)
+    }
   }
   
   func contextDidSaveContext(note: NSNotification, contextHandler: StackContextHandler) {
+    if note.object === mainThreadContext {
+      return
+    }
+    
     if let info = note.userInfo {
       let userInfo = NSDictionary(dictionary: info)
       
@@ -151,32 +169,17 @@ public final class Stack: CustomStringConvertible, Readable {
     }
   }
   
-  public func write(sync transaction: (transaction: Transaction) -> Void) {
-    let context = currentThreadContext()
-
-    context.performBlockAndWait({ [unowned self, context] () -> Void in
-      transaction(transaction: Transaction(stack: self, context: context))
-      context.save(true, completion: { (result) -> () in
-        if case let NSManagedObjectContext.SaveResult.Failed(error) = result {
-          print("Stack: Write failed -- \(error)")
-        }
-      })
-    })
-  }
-  
-  public func write(async transaction: (transaction: Transaction) -> Void, completion: (() -> Void)?) {
-    let context = currentThreadContext()
+  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)?) {
+    let block: () -> () = { [unowned self] in
+      do {
+        try transaction(transaction: Transaction(stack: self, context: self.currentThreadContext()))
+        self.currentThreadContext().save(true, completion: completion)
+      } catch {
+        completion?(error as NSError)
+      }
+    }
     
-    context.performBlock({ [unowned self, context] () -> Void in
-      transaction(transaction: Transaction(stack: self, context: context))
-      context.save(false, completion: { (result) -> () in
-        if case let NSManagedObjectContext.SaveResult.Failed(error) = result {
-          print("Stack: Write failed -- \(error)")
-        }
-        
-        completion?()
-      })
-    })
+    currentThreadContext().performBlockAndWait(block)
   }
 }
 
