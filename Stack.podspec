@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name             = "Stack"
   s.version          = "2.0.0"
-  s.summary          = "A Type-Safe, Swifty approach to CoreData"
+  s.summary          = "A Type-Safe, Thread-Safe-ish approach to CoreData in Swift"
   s.homepage         = "https://github.com/shaps80/Stack"
   s.license          = 'MIT'
   s.author           = { "Shaps Mohsenin" => "shapsuk@me.com" }
