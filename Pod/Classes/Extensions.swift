@@ -8,6 +8,7 @@
 
 import CoreData
 
+#if os(iOS)
 extension NSFetchedResultsController {
   
   public convenience init<T: NSManagedObject>(stack: Stack, query: Query<T>, sectionNameKeyPath: String? = nil, cacheName: String? = nil) throws {
@@ -17,6 +18,7 @@ extension NSFetchedResultsController {
   }
   
 }
+#endif
 
 extension NSManagedObjectContext {
   

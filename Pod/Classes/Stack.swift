@@ -46,7 +46,7 @@ public final class Stack: CustomStringConvertible, Readable {
   }()
   
   
-  private lazy var mainThreadContext: NSManagedObjectContext = {
+  private lazy var mainContext: NSManagedObjectContext = {
     let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
     if self.configuration.stackType == .ManualMerge {
       context.persistentStoreCoordinator = self.coordinator
@@ -59,7 +59,7 @@ public final class Stack: CustomStringConvertible, Readable {
   
   func currentThreadContext() -> NSManagedObjectContext {
     if NSThread.isMainThread() || configuration.stackType == .MainThreadOnly {
-      return mainThreadContext
+      return mainContext
     }
     
     if let context = NSThread.currentThread().threadDictionary[StackThreadContextKey] as? NSManagedObjectContext {
@@ -70,7 +70,7 @@ public final class Stack: CustomStringConvertible, Readable {
     
     switch configuration.stackType {
     case .ParentChild:
-      context.parentContext = mainThreadContext
+      context.parentContext = mainContext
     default:
       context.persistentStoreCoordinator = coordinator
     }
@@ -150,7 +150,7 @@ public final class Stack: CustomStringConvertible, Readable {
   }
   
   func contextDidSaveContext(note: NSNotification, contextHandler: StackContextHandler) {
-    if note.object === mainThreadContext {
+    if note.object === mainContext {
       return
     }
     
@@ -159,17 +159,17 @@ public final class Stack: CustomStringConvertible, Readable {
       
       if let updated = userInfo.objectForKey(NSUpdatedObjectsKey) as? Set<NSManagedObject> {
         for object in updated {
-          do { try mainThreadContext.existingObjectWithID(object.objectID) } catch { }
+          do { try mainContext.existingObjectWithID(object.objectID) } catch { }
         }
       }
     }
 
     dispatch_async(dispatch_get_main_queue()) { () -> Void in
-      self.mainThreadContext.mergeChangesFromContextDidSaveNotification(note)
+      self.mainContext.mergeChangesFromContextDidSaveNotification(note)
     }
   }
   
-  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)?) {
+  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)? = nil) {
     let block: () -> () = { [unowned self] in
       do {
         try transaction(transaction: Transaction(stack: self, context: self.currentThreadContext()))
@@ -181,6 +181,18 @@ public final class Stack: CustomStringConvertible, Readable {
     
     currentThreadContext().performBlockAndWait(block)
   }
+}
+
+// MARK: OSX Additions
+
+extension Stack {
+  
+#if os(OSX)
+  public func mainThreadContext() -> NSManagedObjectContext {
+    return mainContext
+  }
+#endif
+  
 }
 
 // MARK: Default Stack

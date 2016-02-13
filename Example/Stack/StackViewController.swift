@@ -49,18 +49,18 @@ class ViewController: DataViewController {
   private func add(person name: String) {
     let stack = Stack.defaultStack()
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) { () -> Void in
-      // In order to insert, we need to use a `write` transaction
-      stack.write({ (transaction) -> Void in
-        // First, lets insert a new `Person` into CoreData
-        let person = try transaction.insert() as Person // Important!! this cast tells CoreData which entity we want to create
-        
-        // Now we can configure the name for this `Person`
-        person.name = name
-        
-        // when the transaction completes it will automatically persist for us -- updating the UI along with it
-        print("Stack: Inserted -- \(person) -- %@", NSThread.currentThread())
-      }, completion: nil)
+    // In order to insert, we need to use a `write` transaction
+    stack.write({ (transaction) -> Void in
+      // First, lets insert a new `Person` into CoreData
+      let person = try transaction.insert() as Person // Important!! this cast tells CoreData which entity we want to create
+      
+      // Now we can configure the name for this `Person`
+      person.name = name
+      
+      // when the transaction completes it will automatically persist for us -- updating the UI along with it
+      print("Stack: Inserted -- \(person) -- %@", NSThread.currentThread())
+    }) { (error) -> Void in
+      if error != nil { print(error) }
     }
   }
   
@@ -79,7 +79,9 @@ class ViewController: DataViewController {
         
         // when the transaction completes it will automatically persist for us -- updating the UI along with it
         print("Stack: Deleted -- \(person) -- %@", NSThread.currentThread())
-      }, completion: nil)
+      }, completion: { (error) -> Void in
+        if error != nil { print(error) }
+      })
     }
   }
   

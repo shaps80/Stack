@@ -126,13 +126,23 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
     return self
   }
   
+  public func include(properties properties: String...) -> Query<T> {
+    includeProperties = properties
+    return self
+  }
+  
   public func include(properties properties: [String]) -> Query<T> {
     includeProperties = properties
     return self
   }
   
-  public func include(descriptors properties: [NSPropertyDescription]) -> Query<T> {
-    includeProperties = properties
+  public func include(descriptors descriptors: [NSPropertyDescription]) -> Query<T> {
+    includeProperties = descriptors
+    return self
+  }
+  
+  public func include(relationships keyPaths: String...) -> Query<T> {
+    includeRelationships = keyPaths
     return self
   }
   
