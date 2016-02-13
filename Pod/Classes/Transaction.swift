@@ -19,38 +19,17 @@ public class Transaction: Readable, Writable {
     self.stack = stack
     self.context = context
   }
-  
-  public func copy<T: NSManagedObject>(object: T) -> T {
-    let objects = copy([object]) as [T]
-    return objects.first!
-  }
-  
-  public func copy<T: NSManagedObject>(objects objs: T...) -> [T] {
-    return copy(objs)
-  }
-  
-  public func copy<T: NSManagedObject>(objects: [T]) -> [T] {
-    var results = [T]()
     
-    for object in objects {
-      if let obj = context.objectWithID(object.objectID) as? T {
-        results.append(obj)
-      }
-    }
-    
-    return results
-  }
-  
   public func insert<T: NSManagedObject>() throws -> T {
     guard let entityName = stack.entityNameForManagedObjectClass(T) where entityName != NSStringFromClass(NSManagedObject) else {
       throw StackError.EntityNameNotFoundForClass(T)
     }
     
-    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: _stack().currentThreadContext()) as? T else {
+    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: context) as? T else {
       throw StackError.EntityNotFoundInStack(stack, entityName)
     }
     
-    return object
+    return object as T
   }
   
   public func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T {
@@ -82,7 +61,7 @@ public class Transaction: Readable, Writable {
       }
     }
     
-    return objects
+    return objects as [T]
   }
   
   public func delete<T: NSManagedObject>(objects: T...) throws {
@@ -91,10 +70,6 @@ public class Transaction: Readable, Writable {
   
   public func delete<T: NSManagedObject>(objects objects: [T]) throws {
     for object in objects {
-      if object.managedObjectContext != _stack().currentThreadContext() {
-        throw StackError.DeleteFailed("An NSManagedObjectContext cannot delete objects in other contexts")
-      }
-      
       context.deleteObject(object)
     }
   }

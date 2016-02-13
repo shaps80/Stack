@@ -13,8 +13,13 @@ public enum StackError: ErrorType {
   case EntityNotFoundInStack(Stack, String)
   case InvalidResultType(AnyClass.Type)
   case FetchError(NSError?)
-  case SaveFailed(NSError?)
+  case WriteFailed(NSError?)
   case DeleteFailed(String)
+}
+
+public enum StackWriteResult: ErrorType {
+  case Success
+  case Failed(NSError?)
 }
 
 public enum QueryResultType {
@@ -39,10 +44,6 @@ extension NSObject: StackManagedKey { }
 
 public protocol Writable {
   
-  func copy<T: NSManagedObject>(object: T) -> T
-  func copy<T: NSManagedObject>(objects objs: T...) -> [T]
-  func copy<T: NSManagedObject>(objects: [T]) -> [T]
-  
   func insert<T: NSManagedObject>() throws -> T
   func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T
   func insertOrFetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]
@@ -54,11 +55,16 @@ public protocol Writable {
 
 public protocol Readable: StackSupport {
   
+  func copy<T: NSManagedObject>(object: T) -> T
+  func copy<T: NSManagedObject>(objects objs: T...) -> [T]
+  func copy<T: NSManagedObject>(objects: [T]) -> [T]
+  
   func count<T: NSManagedObject>(query: Query<T>) throws -> Int
   
   func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T]
   func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T?
   func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
+  func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T?
   
 }
 
@@ -80,6 +86,31 @@ extension Readable where Self: Transaction {
 
 extension Readable {
   
+  public func copy<T: NSManagedObject>(object: T) -> T {
+    let objects = copy([object]) as [T]
+    return objects.first!
+  }
+  
+  public func copy<T: NSManagedObject>(objects objs: T...) -> [T] {
+    return copy(objs)
+  }
+  
+  public func copy<T: NSManagedObject>(objects: [T]) -> [T] {
+    var results = [T]()
+    
+    for object in objects {
+      if object.managedObjectContext == _stack().currentThreadContext() {
+        results.append(object)
+      } else {
+        if let obj = _stack().currentThreadContext().objectWithID(object.objectID) as? T {
+          results.append(obj)
+        }
+      }
+    }
+    
+    return results
+  }
+  
   public func count<T: NSManagedObject>(query: Query<T>) throws -> Int {
     let request = try fetchRequest(query)
     var error: NSError?
@@ -90,6 +121,13 @@ extension Readable {
     }
     
     return count
+  }
+  
+  public func fetch<T: NSManagedObject>(objectWithID objectID: NSManagedObjectID) throws -> T? {
+    let stack = _stack()
+    let context = stack.currentThreadContext()
+    
+    return try context.existingObjectWithID(objectID) as? T
   }
   
   public func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T] {

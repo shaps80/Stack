@@ -32,13 +32,7 @@ public final class StackConfiguration: CustomStringConvertible {
   
   public private(set) var name: String
   public var persistenceType: StackPersistenceType = .SQLite
-  public var stackType: StackType = .ParentChild {
-    didSet {
-      if stackType == .ManualMerge {
-//        assertionFailure("This is not currently working!")
-      }
-    }
-  }
+  public var stackType: StackType = .ParentChild
   
   public lazy var storeOptions: [NSObject : AnyObject] = {
     return [ NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true ]
@@ -49,9 +43,7 @@ public final class StackConfiguration: CustomStringConvertible {
   }()
   
   public lazy var storeURL: NSURL = {
-    let documentsPath: String! = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).first
-    let path = documentsPath + "/" + self.name + ".sqlite"
-    return NSURL(fileURLWithPath: path)
+    return NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).first!)
   }()
   
   init(name: String) {

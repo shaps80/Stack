@@ -176,12 +176,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
     self.predicate = pred
     return self
   }
-  
-  public convenience init(objectID: NSManagedObjectID) {
-    self.init()
-    predicate = NSPredicate(format: "objectID == %@", objectID)
-  }
-  
+    
   public convenience init<T: StackManagedKey>(key: String, identifier: T) {
     self.init()
     predicate = NSPredicate(format: "%K == %@", key, identifier)

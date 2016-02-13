@@ -15,9 +15,9 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   /*
   
   -------------------------------------------------------------------------
-  This class is used purely to bind the table to a fetchedResultsController 
+  This class is purely NSFetchedResultsController boilerplate code!
   
-  Please checkout StackViewController for example code!
+  Please checkout StackViewController for example code.
   -------------------------------------------------------------------------
   
   */
@@ -40,8 +40,11 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   
   override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCellWithIdentifier("cell")!
-    let person = fetchedResultsController.objectAtIndexPath(indexPath) as! Person
-    cell.textLabel?.text = person.name ?? "unknown"
+    
+    if let person = fetchedResultsController.objectAtIndexPath(indexPath) as? Person {
+      cell.textLabel?.text = person.name ?? "Unknown"
+    }
+
     return cell
   }
   
