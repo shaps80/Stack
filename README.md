@@ -5,11 +5,15 @@
 [![License](https://img.shields.io/cocoapods/l/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![Platform](https://img.shields.io/cocoapods/p/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 
-Stack was created to provide a more expressive, safe and clean implementation for a CoreData stack implementation.
+CoreData is a powerful API, but its easily misused and misunderstood. Stack attempts to remove many of the issues associated with using CoreData in your applications. 
 
-Stack provides block chaining to allow you to better construct your queries, as well as a transaction block to allow you to better batch a series of requests, improving performance.
+Specifically, Stack adds both type-safety and thread-safety (ish) methods for dealing with queries and updates.
 
-Stack also provides cleaner implementations for specifying sort descriptors and predicates.
+Additionally, Stack provides a much more expressive API which is further improved by some of the new features available in Swift. 
+
+* Query chaining
+* Type-safe inserts, updates and deletes
+* Convenience wrappers for sorting, filtering and includes (see Docs for more)
 
 ## Goal
 
