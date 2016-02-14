@@ -5,210 +5,77 @@
 [![License](https://img.shields.io/cocoapods/l/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 [![Platform](https://img.shields.io/cocoapods/p/Stack.svg?style=flat)](http://cocoadocs.org/docsets/Stack)
 
-CoreData is a powerful API, but its easily misused and misunderstood. Stack attempts to remove many of the issues associated with using CoreData in your applications. 
+Wouldn't it be great to have a type-safe CoreData Stack?
+
+__Reading__
+
+```swift
+let stack = Stack.defaultStack()
+let query = Query<Person>().sort(byKey: "name", direction: .Ascending).filter("name == %@", name)
+let results = try! stack.fetch(query)
+print(results.first?.name)
+```
+
+__Writing__
+
+```swift
+let stack = Stack.defaultStack()
+stack.write({ (transaction) -> Void in
+  let person = try transaction.fetchOrInsert("name", identifier: name) as Person
+  person.age = 35
+}, completion: nil)
+```
+
+## Introducing Stack
+
+CoreData is a powerful API, but its easily misused and misunderstood. Stack attempts to remove many of the issues associated with using CoreData in your applications.
 
 Specifically, Stack adds both type-safety and thread-safety (ish) methods for dealing with queries and updates.
 
-Additionally, Stack provides a much more expressive API which is further improved by some of the new features available in Swift. 
+Additionally, Stack provides a much more expressive API through features like:
 
-* Query chaining
 * Type-safe inserts, updates and deletes
-* Convenience wrappers for sorting, filtering and includes (see Docs for more)
+* Query chaining
+* Custom Query class for setting up sorting, filtering, etc... (see Docs for more)
+* Transaction based API -- No access to contexts!
+* Asynchronous
+* Lightweight -- Swift function overloads allow the API to remain clean and concise
+* NSFetchedResultsController support -- convenience init()
 
 ## Goal
 
-Stack aims to provide a clean and safe abstraction from Core Data that gives your the flexibility and power of CoreData without all the context/thread-safety concerns. This is achieved by having complete thread and transaction based context management built right in.
+The aim of Stack is to provide a clean, expressive abstraction from CoreData. Giving you the flexibility and power of CoreData, without all the headache surrounding contexts and thread management.
 
-You wouldn't manage the storage and usage of a CATransaction would you? So why do we still have to think about NSManagedObjectContext?
+With Swift, Stack now supports type-safe queries giving you more confidence when implementing CoreData in your applications.
 
-This is an idea or concept for how I wish CoreData worked out of the box. I'm really keen to get thoughts, suggestions and ideas so please generate a PR or post any issues if you want to contribute ;)
+Stack 2.0 provides read-only access through the Stack itself, moving all write methods into a transaction. This prevents you from making mistakes and attempting to update objects outside of a transaction.
 
-## Features
+Stack is used in various production apps, but I still consider it an ever changing concept so input is welcome :)
 
-* Extremely lightweight -- yet powerful -- CoreData stack -- just 3 classes!!!
-* Full NSManagedObjectContext management -- you don't have to think about it and should never hold a reference to one
-* Clean block based API
-* Chain based API allowing you to chain multiple commands together
-* Transaction blocks -- supporting nesting, siblings and reentrancy
-* `stack_prepare(...)` & `stack_copy(...)` convenience macro for passing objects across threads -- my fave feature!
-* NSFetchedResultsController convenience method for creating them for you
-* Optimised find or create for multiple results!
-* Optimised queries for first/last object -- after predicate and sorting is applied
-* Transactions now save implicitly
+## Need to Know
 
-## Safer
+__Reading__
 
-I am not someone who typically likes to abstract away too many details but with simple and common CoreData configurations, understanding the context, threading and other issues just seemed crazy to me.
+Once you have a Stack, reading is easy. You just need to construct a query and then call one of the `fetch` methods on your stack. Note: The optional is required since a fetch may return nil.
 
-With Stack, you can use a transaction block at anytime to make changes safely. In fact if you have an object from another context/thread you can safely update that too using the Stack macros `stack_prepare(...)` and `stack_copy(...)` which take multiple arguments so you can pass an array, an NSManagedObject instance or a combination of the two. They don't even have to share the same entity type ;)
-
-You can even use Stack queries in, out and around the transaction because Stack automatically uses the right context for you.
-
-```objc
-Stack *stack = [Stack defaultStack];
-Person *person = stack.query(Person.class).whereIdentifier(@"1234", YES);
-// person.name is 'Shaps'
-
-dispatch_async(dispatch_get_global_queue(0, 0), ^{
-stack_prepare(person);
-stack.transaction(^{
-
-stack_copy(person);
-person.name = @"Anne";
-
-}); // person.name is safely updated
-});
+```swift
+let person = try! stack.fetch("name", identifier: "123") as? Person
+print(person?.name)
 ```
 
-## Cleaner
+Now we can update that same object. Note: Thanks to Swift closures, we can safely re-define the variable with the same name.
 
-The best way to understand why Stack is a safer, much simpler implementation for working with CoreData, is to see some code.
-
-```objc
-NSDictionary *attributes = @
-{
-@"name" : @"Shaps",
-@"phone" : @"555-2321"
-};
-
-Stack *stack = [Stack defaultStack];
-stack.transaction(^{    
-Person *person = stack.query(Person.class).whereIdentifier(@"124", YES);
-person.update(attributes);    
-NSLog(@"%@", person);
-});
-}
+```swift
+let stack = Stack.defaultStack()
+stack.write({ (transaction) -> Void in
+  let person = transaction.copy(person)
+  person.age = 35
+}, completion: nil)
 ```
 
-Lets contrast this with a naive approach we might normally see implemented.
+As you can see, all write actions occur ONLY inside a transaction, which prevents many common mistakes when implementing CoreData. 
 
-```objc
-NSDictionary *attributes = @
-{
-@"name" : @"Shaps",
-@"phone" : @"555-2321"
-};
-
-NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-
-[context performBlockAndWait:^{
-NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:Person.entityName];
-NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%K = %@", @"identifier", identifier];
-
-request.predicate = predicate;
-request.fetchLimit = 1;
-
-Person *person = (Person *)[context executeFetchRequest:request error:nil].firstObject;
-
-if (!person) {
-person = [NSEntityDescription insertNewObjectForEntityForName:Person.entityName inManagedObjectContext:context];
-}
-
-[person setValue:identifier forKey:@"identifier"]
-[person setValue:attributes[@"name"] forKey:@"name"];
-[person setValue:attributes[@"phone"] forKey:@"phone"];
-
-NSLog(@"%@", person);
-
-[context save:nil];
-}];
-```
-
-## NSFetchedResultsController
-
-You can also create a NSFetchedResultsController from any query in Stack.
-
-```objc
-controller = stack.query(Account.class).groupBy(@"role").sortBy(@"name").fetchedResultsController();
-```
-
-Stack will automatically setup the context and fetch request for you.
-
-> Note: the groupBy() call is optional and only required if you want sectioning.
-
-## Interface
-
-Hopefully now its a little more obvious how much simpler it is to work with CoreData.
-Stack makes this easy by providing a simple interface compared to most other implementations.
-
-```objc
-@property ... StackQuery *(^wherePredicate)(NSPredicate *predicate);
-@property ... StackQuery *(^where)(NSString *format, ...);
-@property ... StackQuery *(^sortByKey)(NSString *key, BOOL ascending);
-@property ... StackQuery *(^sortWithDescriptors)(NSArray *sortDescriptors);
-@property ... void (^delete)();
-@property ... NSUInteger (^count)();
-@property ... NSArray *(^fetch)();
-@property ... id (^whereIdentifier)(NSString *identifier, BOOL createIfNil);
-@property ... NSArray *(^whereIdentifiers)(NSArray *identifiers, BOOL createIfNil);
-@property ... id (^firstObject)();
-@property ... id (^lastObject)();
-```
-
-Notice most of the implementations return an instance of `StackQuery`, allowing you to chain in any combination. 
-
->Note when calling any of the `sort`, `predicate` or `where` methods multiple times, the last call will be used.
-
-Even my own previous implementations were much more cumbersome than this. Stack provides just a few block-based methods for maximum flexibility, whereas the previous implementation had over 20+ and even then not all combinations or features were accounted for. Here's just a few for comparison:
-
-```objc
-+ (void)deleteAllMatching:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
-+ (NSArray *)objectsWithIdentifiers:(NSArray *)identifiers sorting:(NSArray *)sortDescriptors faulted:(BOOL)faulted create:(BOOL)create inContext:(NSManagedObjectContext *)context;
-+ (instancetype)objectWithIdentifier:(id)identifier faulted:(BOOL)faulted create:(BOOL)create inContext:(NSManagedObjectContext *)context;
-+ (NSUInteger)countAllSorted:(NSArray *)sortDescriptors predicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context;
-+ (NSArray *)allSorted:(NSArray *)sortDescriptors predicate:(NSPredicate *)predicate faulted:(BOOL)faulted inContext:(NSManagedObjectContext *)context;
-```
-
-All methods require you to pass in the current `NSManagedObjectContext` as well. This helped the implementer to keep their code safe from threading issues, but still allowed you to make silly decisions at times. 
-
->And that's not even including all the variations of those methods.
-
-## How is Stack safer
-
-CoreData is unfortunately terrible when it comes to multi-threading. Apple made things a little easier with the introduction of `-performBlock:` but this still requires the implementer to think about their thread usage.
-
-Stack attempts to go one step further by removing the necessity for the implementer to know about the context at all.
-
-Instead all `write` actions _must_ be performed inside a transaction block, where the context is managed for you.
-`Stack.defaultStack.transaction(^{  ...  })`
-
-Read actions can occur anywhere, since those are not a concern. By forcing you to use a transaction block for all saves, Stack can provide better exception and error handling. In fact if you attempt to write to any context outside of a transaction block (even if you're not using Stack directly), an exception will be thrown, making it much easier to find threading issues in your project.
-
-Sometimes however you need to `read` on one thread but want to `write` on another. Stack provides a convenient method macro for copying your objects into the current context for you.
-
-So right before your transaction you can prepare the objects like so:
-
-```objc
-stack_prepare(...)
-stack_prepare(people)
-stack_prepare(person1, people)
-```
-
-Then inside your transaction just copy them into your local context:
-
-```objc
-stack_copy(...)
-stack_copy(people)
-stack_copy(person1, people)
-```
-
-**Example**
-
-```objc
-Person *person = ...; // this was fetched already from another thread/context
-
-stack_prepare(person);
-Stack.defaultStack.transaction(^{
-stack_copy(person); // we now have a local context version
-person.name = @"";
-});
-
-```
-
-
-This allows you to copy an array, a single object, or some variation since the macro uses variadic arguments.
-
->Just make sure you do any updates inside the transaction, otherwise your changes won't persist.
+You probably noticed that copy() function? This is another nice feature provided by Stack. Basically it will copy the object(s) into the current transaction/context so you don't try to modify an object on the wrong thread. And don't worry, all changes will be propogated to your other threads automatically ;)
 
 ## Usage
 
@@ -223,7 +90,7 @@ pod "Stack"
 
 ## Author
 
-Shaps Mohsenin, shapsuk@me.com
+Shaps, shapsuk@me.com
 
 ## License
 
@@ -232,6 +99,4 @@ Stack is available under the MIT license. See the LICENSE file for more info.
 ## Attribution
 
 * All code is my own, no 3rd party code is used in this project at all. 
-* Thanks to [Nick Lockwood](http://github.com/nicklockwood) for help around the transaction API
-* Thanks to [Krzysztof Zablocki](https://github.com/krzysztofzablocki) for the block based inspiration
 

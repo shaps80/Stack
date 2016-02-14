@@ -48,12 +48,16 @@ class ViewController: DataViewController {
     
     // Now we have configured the stack, lets grab it
     let stack = Stack.defaultStack()
+    let person = try! stack.fetch("name", identifier: "123") as? Person
+    print(person?.name)
     
     // Now lets setup a query for `Person`, sorting by the person's `name`
 //    let name = "Anne"
 //    let query = Query<Person>().filter("%K == %@", "name", name)
 //    let query = Query<Person>().filter("name == 'Anne'")
-    let query = Query<Person>()
+    let query = Query<Person>().sort(byKey: "name", direction: .Ascending)
+    let results = try! stack.fetch(query)
+    results.first?.name
     
     // We can now use a convenience init on `NSFetchedResultsController`
     fetchedResultsController = try! NSFetchedResultsController(stack: stack, query: query)

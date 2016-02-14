@@ -65,6 +65,16 @@ public protocol Readable: StackSupport {
    */
   func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T?
   
+  /**
+   Performs a fetch, querying CoreData for an entity with the specified identifier
+   */
+  func fetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T?
+  
+  /**
+   Performs a fetch, querying CoreData for an entity with the specified identifiers
+   */
+  func fetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]?
+  
 }
 
 /**
