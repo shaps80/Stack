@@ -70,6 +70,8 @@ print(person?.name)
 
 Now we can update that same object. Note: Thanks to Swift closures, we can safely re-define the variable with the same name.
 
+__Writing__
+
 ```swift
 let stack = Stack.defaultStack()
 stack.write({ (transaction) -> Void in
