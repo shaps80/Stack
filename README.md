@@ -43,7 +43,7 @@ Additionally, Stack provides a much more expressive API through features like:
 * Asynchronous
 * Lightweight -- Swift function overloads allow the API to remain clean and concise
 * NSFetchedResultsController support -- convenience init()
-* See [Documentation](https://github.com/shaps80/Stack/wiki) for more...
+* See [Documentation](http://cocoadocs.org/docsets/Stack/2.0.0) for more...
 
 ## Goal
 
