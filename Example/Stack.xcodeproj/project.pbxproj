@@ -103,13 +103,13 @@
 		54C505861C073134004DB6BC /* Stack */ = {
 			isa = PBXGroup;
 			children = (
-				54C505891C073144004DB6BC /* Query.swift */,
 				54C5058A1C073144004DB6BC /* Stack.swift */,
+				54C505891C073144004DB6BC /* Query.swift */,
+				547BC24D1C6FCD6800BB4B2B /* Readable.swift */,
+				54C5058B1C073144004DB6BC /* Transaction.swift */,
+				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
 				54C505A91C073501004DB6BC /* StackConfiguration.swift */,
 				54C505881C073144004DB6BC /* Additions.swift */,
-				54C0FE9A1C4E754000A04C91 /* StackTypes.swift */,
-				54C5058B1C073144004DB6BC /* Transaction.swift */,
-				547BC24D1C6FCD6800BB4B2B /* Readable.swift */,
 			);
 			name = Stack;
 			path = ../Pod/Classes;
@@ -558,7 +558,7 @@
 				INFOPLIST_FILE = Stack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.snippex.Stack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Stack/Stack_Example-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -574,7 +574,7 @@
 				INFOPLIST_FILE = Stack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = uk.co.snippex.Stack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Stack/Stack_Example-Bridging-Header.h";
 			};

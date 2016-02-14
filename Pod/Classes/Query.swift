@@ -273,21 +273,19 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   
   public init() { }
   
-  // MARK: Internal 
-  
   /**
-  This convenience initializer is used internally for setting up the query to perform fetches based on identifier
-  
-  - parameter key:        The identifier key
-  - parameter identifier: The identifier value
-  
-  - returns: The configured query
-  */
-  convenience init<ID: StackManagedKey>(key: String, identifier: ID) {
+   This convenience initializer is used internally for setting up the query to perform fetches based on identifier
+   
+   - parameter key:        The identifier key
+   - parameter identifier: The identifier value
+   
+   - returns: The configured query
+   */
+  public convenience init<ID: StackManagedKey>(key: String, identifier: ID) {
     self.init()
     predicate = NSPredicate(format: "%K == %@", key, identifier)
   }
-
+  
   /**
    This convenience initializer is used internally for setting up the query to perform fetches based on multiple identifiers
    
@@ -296,10 +294,12 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The configured query
    */
-  convenience init<IDs: StackManagedKey>(key: String, identifiers: [IDs]) {
+  public convenience init<IDs: StackManagedKey>(key: String, identifiers: [IDs]) {
     self.init()
     predicate = NSPredicate(format: "%K IN %@", key, identifiers)
   }
+  
+  // MARK: Internal 
   
   /// Returns a print friendly description
   public var description: String {

@@ -134,7 +134,7 @@ public final class Stack: CustomStringConvertible, Readable {
     let entities = coordinator.managedObjectModel.entitiesByName.values
     
     for entity in entities {
-      if entity.managedObjectClassName == "\(managedObjectClass)" {
+      if entity.managedObjectClassName == NSStringFromClass(managedObjectClass) {
         return entity.name
       }
     }

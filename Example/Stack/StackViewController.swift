@@ -29,7 +29,7 @@ import Stack
 
 class ViewController: DataViewController {
   
-  // MARK: Configure, Add, Delete
+  // MARK: Stack Configuration, Add, Delete
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -48,7 +48,7 @@ class ViewController: DataViewController {
     
     // Now we have configured the stack, lets grab it
     let stack = Stack.defaultStack()
-    let person = try! stack.fetch("name", identifier: "123") as? Person
+    let person = try! stack.fetch(Query<Person>(key: "name", identifier: "Shaps")).first
     print(person?.name)
     
     // Now lets setup a query for `Person`, sorting by the person's `name`

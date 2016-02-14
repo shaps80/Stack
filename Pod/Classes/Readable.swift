@@ -74,7 +74,8 @@ extension Readable {
   }
   
   /**
-   Returns the number of results that would be returned if a fetch was performed using the specified query
+   Returns the number of results that would be returned if a fe
+   tch was performed using the specified query
    
    - parameter query: The query to perform
    
@@ -140,41 +141,6 @@ extension Readable {
    */
   public func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T? {
     return try fetch(query).first
-  }
-  
-  /**
-   Performs a fetch, querying CoreData for an entity with the specified identifier
-   
-   - parameter key:        The identifier key
-   - parameter identifier: The identifier value
-   
-   - throws: An error will be thrown if the query cannot be performed
-   
-   - returns: The resulting object or nil
-   */
-  public func fetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T? {
-    return try fetch(key, identifiers: [identifier])?.first
-  }
-
-  /**
-   Performs a fetch, querying CoreData for an entity with the specified identifiers
-   
-   - parameter key:         The identifier key
-   - parameter identifiers: The identifier values
-   
-   - throws: An error will be thrown if the query cannot be performed
-   
-   - returns: The resulting objects or nil
-   */
-  public func fetch<T: NSManagedObject, U: StackManagedKey>(key: String, identifiers: [U]) throws -> [T]? {
-    let query = Query<T>(key: key, identifiers: identifiers)
-    let request = try fetchRequest(query)
-    
-    guard let results = try _stack().currentThreadContext().executeFetchRequest(request) as? [T] else {
-      throw StackError.FetchError(nil)
-    }
-    
-    return results
   }
   
   /**

@@ -12,9 +12,9 @@
 		39AB0B14054D63B185AF37FF71AA480C /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D6E480C0164DB3324A2B906690C89F5 /* Stack.swift */; };
 		53D6EF974264D964414F6AE4C89E74A6 /* StackTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AD488B9A0A3CE4AEDFF8E71FFC3A91 /* StackTypes.swift */; };
 		547182E0FD5D8C684DD8A6CBBF8F9417 /* Stack-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B45378E468232B1EA2649F41D4854BD /* Stack-dummy.m */; };
+		54C9F22A1C70085E009CD9CA /* Readable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E06C51D0B60833A73B767FC77D3E297 /* Readable.swift */; };
 		65065C7797D5FA2516C7EEB34A0C4508 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D190B8553BD3314394B7A68597ECD513 /* CoreData.framework */; };
 		7C121400046A8421F11159B5330B030A /* Pods-Stack_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = E1353726C0D05B61C21233719E9D2CBB /* Pods-Stack_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		80B258CD8A85F7210E55EA9BA5BB5789 /* Readable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E06C51D0B60833A73B767FC77D3E297 /* Readable.swift */; };
 		849199C63ED3A260119D0502D3EB8991 /* Stack-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FF100FFD2F92389B74E528EF8E648ED /* Stack-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2CD1AC63DFF4FF0651E6C55118D320C /* Pods-Stack_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 1863236857B916E89A41A1CF7E800604 /* Pods-Stack_Tests-dummy.m */; };
 		AB06CFDE0871F8FFB64FC3B9D1D98BC6 /* StackConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60E4B8CF6F559FFF908062361872B3D /* StackConfiguration.swift */; };
@@ -376,8 +376,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				378738CF81ED1AAD2FE9B1CEFC2E68BD /* Additions.swift in Sources */,
+				54C9F22A1C70085E009CD9CA /* Readable.swift in Sources */,
 				AB12EDE774EC0CDD180A5404EBE6096C /* Query.swift in Sources */,
-				80B258CD8A85F7210E55EA9BA5BB5789 /* Readable.swift in Sources */,
 				547182E0FD5D8C684DD8A6CBBF8F9417 /* Stack-dummy.m in Sources */,
 				39AB0B14054D63B185AF37FF71AA480C /* Stack.swift in Sources */,
 				AB06CFDE0871F8FFB64FC3B9D1D98BC6 /* StackConfiguration.swift in Sources */,
