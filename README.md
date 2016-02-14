@@ -1,3 +1,5 @@
+<img src="assets/stack.png" width=128 height=128 alt="Stack Logo" />
+
 # Stack
 
 [![CI Status](http://img.shields.io/travis/shaps80/Stack.svg?style=flat)](https://travis-ci.org/shaps80/Stack)
