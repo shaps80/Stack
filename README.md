@@ -36,11 +36,12 @@ Additionally, Stack provides a much more expressive API through features like:
 
 * Type-safe inserts, updates and deletes
 * Query chaining
-* Custom Query class for setting up sorting, filtering, etc... (see Docs for more)
+* Custom Query class for setting up sorting, filtering, etc...
 * Transaction based API -- No access to contexts!
 * Asynchronous
 * Lightweight -- Swift function overloads allow the API to remain clean and concise
 * NSFetchedResultsController support -- convenience init()
+* See [Documentation](https://github.com/shaps80/Stack/wiki) for more...
 
 ## Goal
 
@@ -59,7 +60,9 @@ __Reading__
 Once you have a Stack, reading is easy. You just need to construct a query and then call one of the `fetch` methods on your stack. Note: The optional is required since a fetch may return nil.
 
 ```swift
-let person = try! stack.fetch("name", identifier: "123") as? Person
+let stack = Stack.defaultStack()
+let query= Query<Person>(key: "name", identifier: "Shaps")
+let person = try! stack.fetch(query).first
 print(person?.name)
 ```
 
@@ -75,7 +78,11 @@ stack.write({ (transaction) -> Void in
 
 As you can see, all write actions occur ONLY inside a transaction, which prevents many common mistakes when implementing CoreData. 
 
-You probably noticed that copy() function? This is another nice feature provided by Stack. Basically it will copy the object(s) into the current transaction/context so you don't try to modify an object on the wrong thread. And don't worry, all changes will be propogated to your other threads automatically ;)
+You probably noticed that `copy()` function? This is another nice feature provided by Stack. Basically it will copy the object(s) into the current transaction/context so you don't try to modify an object on the wrong thread. And don't worry, all changes will be propogated to your other threads automatically ;)
+
+## Docs
+
+To learn more about how to use Stack. Checkout the included example project, read over the unit tests or checkout the [documentation](https://github.com/shaps80/Stack/wiki).
 
 ## Usage
 
