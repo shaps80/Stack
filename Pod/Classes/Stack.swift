@@ -182,7 +182,7 @@ public final class Stack: CustomStringConvertible, Readable {
     
     if config.stackType == .ManualMerge {
       contextHandler = StackContextHandler(stack: self)
-      NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: "contextDidSaveContext:", name: NSManagedObjectContextDidSaveNotification, object: nil)
+      NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: #selector(StackContextHandler.contextDidSaveContext(_:)), name: NSManagedObjectContextDidSaveNotification, object: nil)
     }
   }
   
