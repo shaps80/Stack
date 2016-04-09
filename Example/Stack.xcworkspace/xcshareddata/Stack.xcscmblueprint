@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "5343E412DB191DE1D3D2C96252AD542839908E4D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "5343E412DB191DE1D3D2C96252AD542839908E4D" : 0,
+    "AD5AF6AEDDDD730FA80703CD514927426A013C86" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "24880D6A-3814-4A8D-83A7-26E7EDEDE2C2",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "5343E412DB191DE1D3D2C96252AD542839908E4D" : "Stack\/",
+    "AD5AF6AEDDDD730FA80703CD514927426A013C86" : "..\/TAB\/TABSwiftLayout"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Stack",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Example\/Stack.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:shaps80\/Stack.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5343E412DB191DE1D3D2C96252AD542839908E4D"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:theappbusiness\/TABSwiftLayout.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "AD5AF6AEDDDD730FA80703CD514927426A013C86"
+    }
+  ]
+}
