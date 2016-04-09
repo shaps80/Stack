@@ -2,10 +2,10 @@
 # * http://www.objc.io/issue-6/travis-ci.html
 # * https://github.com/supermarin/xcpretty#usage
 
-language: objective-c
+language: swift
 xcode_workspace: Example/Stack.xcworkspace
 xcode_scheme: Stack-Example
-xcode_sdk: iphonesimulator9.2
+xcode_sdk: iphonesimulator
 podfile: Example/Podfile
 
 
