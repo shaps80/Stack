@@ -342,6 +342,21 @@
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0720;
+				TargetAttributes = {
+					4613AC6AD26A231D48F3C3C146E994FE = {
+						DevelopmentTeam = V2CWYL9AN8;
+						DevelopmentTeamName = "Shahpour Mohsenin";
+						LastSwiftMigration = 0800;
+					};
+					5048ACDD52B6AE1F06BC94552DD73238 = {
+						DevelopmentTeam = V2CWYL9AN8;
+						DevelopmentTeamName = "Shahpour Mohsenin";
+					};
+					70D58C7E922F87014328E9B9FAA59FEF = {
+						DevelopmentTeam = V2CWYL9AN8;
+						DevelopmentTeamName = "Shahpour Mohsenin";
+					};
+				};
 			};
 			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -499,6 +514,7 @@
 				PRODUCT_NAME = Stack;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -632,6 +648,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";

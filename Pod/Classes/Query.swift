@@ -58,11 +58,11 @@ public enum QueryResultType {
   func toFetchRequestResultType() -> NSFetchRequestResultType {
     switch self {
     case .ManagedObjects:
-      return .ManagedObjectResultType
+      return []
     case .Dictionaries:
-      return .DictionaryResultType
+      return .dictionaryResultType
     case .ManagedObjectIDs:
-      return .ManagedObjectIDResultType
+      return .managedObjectIDResultType
     }
   }
 }
@@ -153,7 +153,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    - returns: The modified query
    */
   public func sort(byKey key: String, direction: SortDirection = .Ascending) -> Query<T> {
-    let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .Ascending)
+    let sortDescriptor = SortDescriptor(key: key, ascending: direction == .Ascending)
     sortDescriptors.append(sortDescriptor)
     return self
   }
@@ -167,7 +167,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public func sort(byKeys keys: [String: SortDirection]) -> Query<T> {
     for (key, direction) in keys {
-      let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .Ascending)
+      let sortDescriptor = SortDescriptor(key: key, ascending: direction == .Ascending)
       sortDescriptors.append(sortDescriptor)
     }
     
@@ -181,8 +181,8 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The modified query
    */
-  public func sort(bySortDescriptors descriptors: [NSSortDescriptor]) -> Query<T> {
-    sortDescriptors.appendContentsOf(descriptors)
+  public func sort(bySortDescriptors descriptors: [SortDescriptor]) -> Query<T> {
+    sortDescriptors.append(contentsOf: descriptors)
     return self
   }
   
@@ -193,7 +193,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The modified query
    */
-  public func filter(predicate pred: NSPredicate) -> Query<T> {
+  public func filter(predicate pred: Predicate) -> Query<T> {
     self.predicate = pred
     return self
   }
@@ -207,7 +207,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    - returns: The modified query
    */
   public func filter(format: String, _ args: AnyObject...) -> Query<T> {
-    self.predicate = NSPredicate(format: format, argumentArray: args)
+    self.predicate = Predicate(format: format, argumentArray: args)
     return self
   }
   
@@ -283,7 +283,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public convenience init<ID: StackManagedKey>(key: String, identifier: ID) {
     self.init()
-    predicate = NSPredicate(format: "%K == %@", key, identifier)
+    predicate = Predicate(format: "%K == %@", key, identifier)
   }
   
   /**
@@ -296,7 +296,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public convenience init<IDs: StackManagedKey>(key: String, identifiers: [IDs]) {
     self.init()
-    predicate = NSPredicate(format: "%K IN %@", key, identifiers)
+    predicate = Predicate(format: "%K IN %@", key, identifiers)
   }
   
   // MARK: Internal 
@@ -334,10 +334,10 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   }
   
   /// Get/set the predicate for this query
-  private(set) var predicate: NSPredicate?
+  private(set) var predicate: Predicate?
   
   /// Get/set the sortDescriptors for this query
-  private(set) var sortDescriptors = [NSSortDescriptor]()
+  private(set) var sortDescriptors = [SortDescriptor]()
   
   /// Get/set the fetchBatchSize for this query. Defaults to 0
   private(set) var fetchBatchSize = 0
@@ -399,8 +399,8 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: A newly configured NSFetchRequest
    */
-  func fetchRequestForEntityNamed(entityName: String) -> NSFetchRequest? {
-    let request = NSFetchRequest(entityName: entityName)
+  func fetchRequestForEntityNamed(entityName: String) -> NSFetchRequest<NSManagedObject>? {
+    let request = NSFetchRequest<NSManagedObject>(entityName: entityName)
     
     request.predicate = predicate
     request.sortDescriptors = sortDescriptors

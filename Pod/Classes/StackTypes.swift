@@ -114,7 +114,7 @@ Used throughout Stack to provide finer grained error handling
 - InvalidResultType:          The result type expected from a fetch request was invalid
 - FetchError:                 A generic error occurred
 */
-public enum StackError: ErrorType {
+public enum StackError: ErrorProtocol {
   case EntityNameNotFoundForClass(AnyClass)
   case EntityNotFoundInStack(Stack, String)
   case InvalidResultType(AnyClass.Type)
@@ -127,7 +127,7 @@ public enum StackError: ErrorType {
 /**
  *  Defines a protocol that all NSManagedObject key's must conform to in order to be used as an identifier
  */
-public protocol StackManagedKey: NSObjectProtocol, Equatable, Hashable, CVarArgType { }
+public protocol StackManagedKey: NSObjectProtocol, Equatable, Hashable, CVarArg { }
 extension NSObject: StackManagedKey { }
 
 /**

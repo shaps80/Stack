@@ -47,75 +47,83 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   // MARK: Subclassers Methods
   
   @IBAction func add(sender: AnyObject?) { /* implement in subclass */ }
-  func delete(atIndexPath indexPath: NSIndexPath) { /* implement in subclass */ }
+  func delete(atIndexPath indexPath: IndexPath) { /* implement in subclass */ }
 
   // MARK: TableView DataSource
   
-  override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return fetchedResultsController.fetchedObjects?.count ?? 0
+  func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    return fetchedResultsController.sections?.count ?? 0
   }
   
-  override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCellWithIdentifier("cell")!
+  override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    guard fetchedResultsController.sections?.count > 0 else {
+      return 0
+    }
     
-    if let person = fetchedResultsController.objectAtIndexPath(indexPath) as? Person {
+    return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+  }
+  
+  func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: "cell")!
+    
+    if let person = fetchedResultsController.object(at: indexPath) as? Person {
       cell.textLabel?.text = person.name ?? "Unknown"
     }
 
     return cell
   }
   
-  override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+  func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: IndexPath) -> Bool {
     return true
   }
   
-  override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-    if editingStyle == .Delete {
+  func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: IndexPath) {
+    if editingStyle == .delete {
       delete(atIndexPath: indexPath)
     }
   }
   
   // MARK: FetchedResultsController Delegate
   
-  var fetchedResultsController: NSFetchedResultsController!
+  var fetchedResultsController: NSFetchedResultsController<NSManagedObject>!
   
-  func controllerWillChangeContent(controller: NSFetchedResultsController) {
+  private func controllerWillChangeContent(controller: NSFetchedResultsController<NSManagedObject>) {
     tableView.beginUpdates()
     
-    if !NSThread.isMainThread() {
+    if !Thread.isMainThread {
       fatalError("Fetched Results Controller executed off the main thread!!")
     }
   }
   
-  func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+  func controller(controller: NSFetchedResultsController<NSManagedObject>, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
     
     switch type {
-    case .Insert:
-      tableView.insertSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
-    case .Delete:
-      tableView.deleteSections(NSIndexSet(index: sectionIndex), withRowAnimation: .Automatic)
+    case .insert:
+      tableView.insertSections(IndexSet(integer: sectionIndex), with: .automatic)
+    case .delete:
+      tableView.deleteSections(IndexSet(integer: sectionIndex), with: .automatic)
     default:
       break
     }
   }
   
-  func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+  private func controller(controller: NSFetchedResultsController<NSManagedObject>, didChangeObject anObject: AnyObject, atIndexPath indexPath: IndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
     switch type {
-    case .Insert:
-      tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+    case .insert:
+      tableView.insertRows(at: [newIndexPath!], with: .automatic)
       print("FRC: Inserted -- \(anObject)")
-    case .Delete:
-      tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
+    case .delete:
+      tableView.deleteRows(at: [indexPath!], with: .automatic)
       print("FRC: Deleted -- \(anObject)")
-    case .Update:
-      tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-    case .Move:
-      tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-      tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+    case .update:
+      tableView.reloadRows(at: [indexPath!], with: .automatic)
+    case .move:
+      tableView.deleteRows(at: [indexPath!], with: .automatic)
+      tableView.insertRows(at: [newIndexPath!], with: .automatic)
     }
   }
   
-  func controllerDidChangeContent(controller: NSFetchedResultsController) {
+  private func controllerDidChangeContent(controller: NSFetchedResultsController<NSManagedObject>) {
     tableView.endUpdates()
   }
 

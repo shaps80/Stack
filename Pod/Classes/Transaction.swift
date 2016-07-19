@@ -55,7 +55,7 @@ public class Transaction: Readable, Writable {
       throw StackError.EntityNameNotFoundForClass(T)
     }
     
-    guard let object = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: context) as? T else {
+    guard let object = NSEntityDescription.insertNewObject(forEntityName: entityName, into: context) as? T else {
       throw StackError.EntityNotFoundInStack(stack, entityName)
     }
     
@@ -66,7 +66,7 @@ public class Transaction: Readable, Writable {
    Fetches (or inserts if not found) an entity with the specified identifier
    */
   public func fetchOrInsert<T: NSManagedObject, U: StackManagedKey>(key: String, identifier: U) throws -> T {
-    let results = try fetchOrInsert(key, identifiers: [identifier]) as [T]
+    let results = try fetchOrInsert(key: key, identifiers: [identifier]) as [T]
     return results.first!
   }
   
@@ -75,9 +75,9 @@ public class Transaction: Readable, Writable {
    */
   public func fetchOrInsert<T : NSManagedObject, U : StackManagedKey>(key: String, identifiers: [U]) throws -> [T] {
     let query = Query<T>(key: key, identifiers: identifiers)
-    let request = try fetchRequest(query)
+    let request = try fetchRequest(query: query)
     
-    guard let results = try context.executeFetchRequest(request) as? [T] else {
+    guard let results = try context.fetch(request) as? [T] else {
       throw StackError.FetchError(nil)
     }
     
@@ -86,7 +86,7 @@ public class Transaction: Readable, Writable {
     }
     
     var objects = [T]()
-    if let existingIds = (results as NSArray).valueForKey(key) as? [U] {
+    if let existingIds = (results as NSArray).value(forKey: key) as? [U] {
       for id in identifiers {
         if !existingIds.contains(id) {
           let result = try insert() as T
@@ -112,7 +112,7 @@ public class Transaction: Readable, Writable {
     let stack = _stack()
     let context = stack.currentThreadContext()
     
-    return try context.existingObjectWithID(objectID) as? T
+    return try context.existingObject(with: objectID) as? T
   }
   
   /**
@@ -127,7 +127,7 @@ public class Transaction: Readable, Writable {
    */
   public func delete<T: NSManagedObject>(objects objects: [T]) throws {
     for object in objects {
-      context.deleteObject(object)
+      context.delete(object)
     }
   }
   

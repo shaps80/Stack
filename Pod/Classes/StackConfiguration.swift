@@ -82,13 +82,13 @@ public final class StackConfiguration: CustomStringConvertible {
   }()
   
   /// Get/set the bundle where your model can be loaded from. Defaults to NSBundle.mainBundle()
-  public lazy var bundle: NSBundle = {
-    return NSBundle.mainBundle()
+  public lazy var bundle: Bundle = {
+    return Bundle.main
   }()
   
   /// Get/set the storeURL where your Stack will be stored. Defaults to $APP_DIR/Documents (Note: this does not include filename or extension)
   public lazy var storeURL: NSURL = {
-    return NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true).first!)
+    return NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true).first!)
   }()
   
   /**

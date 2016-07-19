@@ -35,7 +35,7 @@ extension Readable {
    - returns: The newly copied object
    */
   public func copy<T: NSManagedObject>(object: T) -> T {
-    let objects = copy([object]) as [T]
+    let objects = copy(objects: [object]) as [T]
     return objects.first!
   }
   
@@ -47,7 +47,7 @@ extension Readable {
    - returns: The newly copied objects
    */
   public func copy<T: NSManagedObject>(objects objs: T...) -> [T] {
-    return copy(objs)
+    return copy(objects: objs)
   }
   
   /**
@@ -64,7 +64,7 @@ extension Readable {
       if object.managedObjectContext == _stack().currentThreadContext() {
         results.append(object)
       } else {
-        if let obj = _stack().currentThreadContext().objectWithID(object.objectID) as? T {
+        if let obj = _stack().currentThreadContext().object(with: object.objectID) as? T {
           results.append(obj)
         }
       }
@@ -84,9 +84,9 @@ extension Readable {
    - returns: The number of results
    */
   public func count<T: NSManagedObject>(query: Query<T>) throws -> Int {
-    let request = try fetchRequest(query)
+    let request = try fetchRequest(query: query)
     var error: NSError?
-    let count = _stack().currentThreadContext().countForFetchRequest(request, error: &error)
+    let count = try _stack().currentThreadContext().count(for: request)
     
     if let error = error {
       throw StackError.FetchError(error)
@@ -105,12 +105,12 @@ extension Readable {
    - returns: The resulting objects
    */
   public func fetch<T: NSManagedObject>(query: Query<T>) throws -> [T] {
-    let request = try fetchRequest(query)
+    let request = try fetchRequest(query: query)
     
     let stack = _stack()
     let context = stack.currentThreadContext()
     
-    guard let results = try context.executeFetchRequest(request) as? [T] else {
+    guard let results = try context.fetch(request) as? [T] else {
       throw StackError.InvalidResultType(T.Type)
     }
     
@@ -127,7 +127,7 @@ extension Readable {
    - returns: The resulting object or nil
    */
   public func fetch<T: NSManagedObject>(first query: Query<T>) throws -> T? {
-    return try fetch(query).first
+    return try fetch(query: query).first
   }
   
   /**
@@ -140,7 +140,7 @@ extension Readable {
    - returns: The resulting object or nil
    */
   public func fetch<T: NSManagedObject>(last query: Query<T>) throws -> T? {
-    return try fetch(query).first
+    return try fetch(query: query).last
   }
   
   /**
@@ -152,12 +152,12 @@ extension Readable {
    
    - returns: The resulting NSFetchRequest -- Note: this will not be configured
    */
-  internal func fetchRequest<T: NSManagedObject>(query: Query<T>) throws -> NSFetchRequest {
+  internal func fetchRequest<T: NSManagedObject>(query: Query<T>) throws -> NSFetchRequest<NSManagedObject> {
     guard let entityName = _stack().entityNameForManagedObjectClass(T) else {
       throw StackError.EntityNameNotFoundForClass(T)
     }
     
-    guard let request = query.fetchRequestForEntityNamed(entityName) else {
+    guard let request = query.fetchRequestForEntityNamed(entityName: entityName) else {
       throw StackError.EntityNotFoundInStack(_stack(), entityName)
     }
     

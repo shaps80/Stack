@@ -37,8 +37,8 @@ class StackContextHandler: NSObject {
   }
   
   // Called when an NSManagedObjectContext posts changes
-  func contextDidSaveContext(note: NSNotification) {
-    stack.contextDidSaveContext(note, contextHandler: self)
+  @objc func contextDidSaveContext(note: NSNotification) {
+    stack.contextDidSaveContext(note: note, contextHandler: self)
   }
   
 }
@@ -65,18 +65,18 @@ public final class Stack: CustomStringConvertible, Readable {
   
   /// The root context. Used only when stackType != .ManualMerge
   lazy var rootContext: NSManagedObjectContext = {
-    let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+    let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
     context.persistentStoreCoordinator = self.coordinator
     return context
   }()
   
   /// The main thread context.
   private lazy var mainContext: NSManagedObjectContext = {
-    let context = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
+    let context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
     if self.configuration.stackType == .ManualMerge {
       context.persistentStoreCoordinator = self.coordinator
     } else {
-      context.parentContext = self.rootContext
+      context.parent = self.rootContext
     }
     
     return context
@@ -88,24 +88,24 @@ public final class Stack: CustomStringConvertible, Readable {
    - returns: An NSManagedObjectContext that can be used on the current thread
    */
   func currentThreadContext() -> NSManagedObjectContext {
-    if NSThread.isMainThread() || configuration.stackType == .MainThreadOnly {
+    if Thread.isMainThread || configuration.stackType == .MainThreadOnly {
       return mainContext
     }
     
-    if let context = NSThread.currentThread().threadDictionary[StackThreadContextKey] as? NSManagedObjectContext {
+    if let context = Thread.current.threadDictionary[StackThreadContextKey] as? NSManagedObjectContext {
       return context
     }
     
-    let context = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+    let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
     
     switch configuration.stackType {
     case .ParentChild:
-      context.parentContext = mainContext
+      context.parent = mainContext
     default:
       context.persistentStoreCoordinator = coordinator
     }
     
-    NSThread.currentThread().threadDictionary[StackThreadContextKey] = context
+    Thread.current.threadDictionary[StackThreadContextKey] = context
     return context
   }
   
@@ -130,7 +130,7 @@ public final class Stack: CustomStringConvertible, Readable {
    
    - returns: The entity name for this managedObject class or nil if not found
    */
-  func entityNameForManagedObjectClass(managedObjectClass: AnyClass) -> String? {
+  func entityNameForManagedObjectClass(_ managedObjectClass: AnyClass) -> String? {
     let entities = coordinator.managedObjectModel.entitiesByName.values
     
     for entity in entities {
@@ -156,7 +156,7 @@ public final class Stack: CustomStringConvertible, Readable {
   private init(config: StackConfiguration) {
     self.configuration = config
     
-    let model = NSManagedObjectModel.mergedModelFromBundles(nil)
+    let model = NSManagedObjectModel.mergedModel(from: nil)
     precondition(model != nil, "Stack: A valid NSManagedObjectModel must be provided!")
     coordinator = NSPersistentStoreCoordinator(managedObjectModel: model!)
     
@@ -174,21 +174,21 @@ public final class Stack: CustomStringConvertible, Readable {
       
       let filename = config.name
       let pathExtension = config.persistenceType == .SQLite ? ".sqlite" : ".bin"
-      let path = NSURL(string: filename + pathExtension, relativeToURL: config.storeURL)
-      try coordinator.addPersistentStoreWithType(storeType, configuration: nil, URL: path, options: config.storeOptions)
+      let path = URL(string: filename + pathExtension, relativeTo: config.storeURL as URL)
+      try coordinator.addPersistentStore(ofType: storeType, configurationName: nil, at: path, options: config.storeOptions)
     } catch {
       print("Unable to add a persistent store for configuration: \(config)")
     }
     
     if config.stackType == .ManualMerge {
       contextHandler = StackContextHandler(stack: self)
-      NSNotificationCenter.defaultCenter().addObserver(contextHandler!, selector: #selector(StackContextHandler.contextDidSaveContext(_:)), name: NSManagedObjectContextDidSaveNotification, object: nil)
+      NotificationCenter.default.addObserver(contextHandler!, selector: #selector(StackContextHandler.contextDidSaveContext(note:)), name: NSNotification.Name.NSManagedObjectContextDidSave, object: nil)
     }
   }
   
   deinit {
     if configuration.stackType == .ManualMerge {
-      NSNotificationCenter.defaultCenter().removeObserver(contextHandler!, name: NSManagedObjectContextDidSaveNotification, object: rootContext)
+      NotificationCenter.default.removeObserver(contextHandler!, name: NSNotification.Name.NSManagedObjectContextDidSave, object: rootContext)
     }
   }
   
@@ -200,15 +200,15 @@ public final class Stack: CustomStringConvertible, Readable {
     if let info = note.userInfo {
       let userInfo = NSDictionary(dictionary: info)
       
-      if let updated = userInfo.objectForKey(NSUpdatedObjectsKey) as? Set<NSManagedObject> {
+      if let updated = userInfo.object(forKey: NSUpdatedObjectsKey) as? Set<NSManagedObject> {
         for object in updated {
-          do { try mainContext.existingObjectWithID(object.objectID) } catch { }
+          do { try mainContext.existingObject(with: object.objectID) } catch { }
         }
       }
     }
 
-    dispatch_async(dispatch_get_main_queue()) { () -> Void in
-      self.mainContext.mergeChangesFromContextDidSaveNotification(note)
+    DispatchQueue.main.async {
+      self.mainContext.mergeChanges(fromContextDidSave: note as Notification)
     }
   }
   
@@ -216,13 +216,13 @@ public final class Stack: CustomStringConvertible, Readable {
     let block: () -> () = { [unowned self] in
       do {
         try transaction(transaction: Transaction(stack: self, context: self.currentThreadContext()))
-        self.currentThreadContext().save(true, completion: completion)
+        self.currentThreadContext().save(synchronous: true, completion: completion)
       } catch {
         completion?(error as NSError)
       }
     }
     
-    currentThreadContext().performBlockAndWait(block)
+    currentThreadContext().performAndWait(block)
   }
 }
 

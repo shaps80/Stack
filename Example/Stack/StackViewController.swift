@@ -27,6 +27,14 @@ import UIKit
 import CoreData
 import Stack
 
+extension NSString {
+  
+  dynamic var initial: String? {
+    return String(uppercased.characters.first)
+  }
+  
+}
+
 class ViewController: DataViewController {
   
   // MARK: Stack Configuration, Add, Delete
@@ -48,19 +56,17 @@ class ViewController: DataViewController {
     
     // Now we have configured the stack, lets grab it
     let stack = Stack.defaultStack()
-    let person = try! stack.fetch(Query<Person>(key: "name", identifier: "Shaps")).first
+    let person = try! stack.fetch(query: Query<Person>(key: "name", identifier: "Shaps")).first
     print(person?.name)
     
     // Now lets setup a query for `Person`, sorting by the person's `name`
 //    let name = "Anne"
 //    let query = Query<Person>().filter("%K == %@", "name", name)
 //    let query = Query<Person>().filter("name == 'Anne'")
-    let query = Query<Person>().sort(byKey: "name", direction: .Ascending)
-    let results = try! stack.fetch(query)
-    results.first?.name
+    let query = Query<Person>().sort(byKey: "name.initial").sort(byKey: "name", direction: .Descending)
     
     // We can now use a convenience init on `NSFetchedResultsController`
-    fetchedResultsController = try! NSFetchedResultsController(stack: stack, query: query)
+    fetchedResultsController = try! stack.newFetchedResultsController(query: query, sectionNameKeyPath: "name.initial")
     fetchedResultsController.delegate = self
 
     // in your application you may do this lazily
@@ -71,34 +77,35 @@ class ViewController: DataViewController {
     let stack = Stack.defaultStack()
 
     // In order to insert, we need to use a `write` transaction
-    stack.write({ (transaction) -> Void in
+    stack.write(transaction: { (transaction) -> Void in
       // First, lets insert a new `Person` into CoreData
-      let person = try transaction.fetchOrInsert("name", identifier: name) as Person
+      let person = try transaction.fetchOrInsert(key: "name", identifier: name) as Person
       
       // when the transaction completes it will automatically persist for us -- updating the UI along with it
-      print("Stack: Inserted -- \(person) -- %@", NSThread.currentThread())
+      print("Stack: Inserted -- \(person) -- %@", Thread.current)
     }) { (error) -> Void in
       if error != nil { print(error) }
     }
   }
   
-  override func delete(atIndexPath indexPath: NSIndexPath) {
+  override func delete(atIndexPath indexPath: IndexPath) {
     let stack = Stack.defaultStack()
-    let person = fetchedResultsController.objectAtIndexPath(indexPath) as! Person
+    let person = fetchedResultsController.object(at: indexPath) as! Person
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)) { () -> Void in
+    DispatchQueue.global(attributes: .qosUserInitiated).async {
       // In order to delete, we need to use a `write` transaction
-      stack.write({ (transaction) -> Void in
+      stack.write(transaction: { (transaction) -> Void in
         // first we need to copy the object into the current transaction
-        let person = transaction.copy(person)
+        let person = transaction.copy(object: person)
         
         // now we can delete it
-        try transaction.delete(person)
+        try transaction.delete(objects: person)
         
         // when the transaction completes it will automatically persist for us -- updating the UI along with it
-        print("Stack: Deleted -- \(person) -- %@", NSThread.currentThread())
-      }, completion: { (error) -> Void in
-        if error != nil { print(error) }
+        print("Stack: Deleted -- \(person) -- %@", Thread.current)
+        
+        }, completion: { (error) -> Void in
+          if error != nil { print(error) }
       })
     }
   }
@@ -106,26 +113,26 @@ class ViewController: DataViewController {
   // MARK: AlertControllers
   
   override func add(sender: AnyObject?) {
-    let controller = UIAlertController(title: "Stack", message: "Enter a name for this person", preferredStyle: .Alert)
+    let controller = UIAlertController(title: "Stack", message: "Enter a name for this person", preferredStyle: .alert)
     
-    controller.addTextFieldWithConfigurationHandler { (field) -> Void in
+    controller.addTextField { (field) in
       field.placeholder = "name"
     }
     
-    controller.addAction(UIAlertAction(title: "Submit", style: .Default, handler: { (action) -> Void in
-      if let field = controller.textFields?.first, name = field.text {
+    controller.addAction(UIAlertAction(title: "Submit", style: .default, handler: { (action) -> Void in
+      if let field = controller.textFields?.first, let name = field.text {
           self.add(person: name)
       }
     }))
     
-    controller.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
-    presentViewController(controller, animated: true, completion: nil)
+    controller.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+    present(controller, animated: true, completion: nil)
   }
   
-  func handleError(error: ErrorType) {
-    let controller = UIAlertController(title: "Stack", message: "\(error)", preferredStyle: .Alert)
-    controller.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
-    presentViewController(controller, animated: true, completion: nil)
+  func handleError(error: ErrorProtocol) {
+    let controller = UIAlertController(title: "Stack", message: "\(error)", preferredStyle: .alert)
+    controller.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+    present(controller, animated: true, completion: nil)
   }
 
 }

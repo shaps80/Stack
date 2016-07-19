@@ -33,8 +33,8 @@ import CoreData
  
  - returns: An NSCompoundPredicate
  */
-public func && (left: NSPredicate, right: NSPredicate) -> NSPredicate {
-  return NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [left, right])
+public func && (left: Predicate, right: Predicate) -> Predicate {
+  return CompoundPredicate(type: .and, subpredicates: [left, right])
 }
 
 
@@ -46,33 +46,22 @@ public func && (left: NSPredicate, right: NSPredicate) -> NSPredicate {
  
  - returns: An NSCompoundPredicate
  */
-public func || (left: NSPredicate, right: NSPredicate) -> NSPredicate {
-  return NSCompoundPredicate(type: NSCompoundPredicateType.OrPredicateType, subpredicates: [left, right])
+public func || (left: Predicate, right: Predicate) -> Predicate {
+  return CompoundPredicate(type: .or, subpredicates: [left, right])
 }
 
 #if os(iOS)
-  
-  extension NSFetchedResultsController {
+
+  extension Stack {
     
-    /**
-     Provides a convenience initializer for creating an NSFetchedResultsController from a Stack and Query. Note: you are still required to call -performFetch()
-     
-     - parameter stack:              The stack to use
-     - parameter query:              The query to use for configuring this fetched results controller
-     - parameter sectionNameKeyPath: The keyPath to use for providing section information (optional)
-     - parameter cacheName:          The cache name to use for caching results (optional)
-     
-     - throws: Throws an error if the fetchRequest cannot be created from the specified query
-     
-     - returns: A newly configured NSFetchedResultsController.
-     */
-    public convenience init<T: NSManagedObject>(stack: Stack, query: Query<T>, sectionNameKeyPath: String? = nil, cacheName: String? = nil) throws {
-      precondition(NSThread.isMainThread(), "You must ONLY create an NSFetchedResultsController from the Main Thread")
-      let request = try stack.fetchRequest(query)
-      self.init(fetchRequest: request, managedObjectContext: stack.currentThreadContext(), sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
+    public func newFetchedResultsController<T: NSManagedObject>(query: Query<T>, sectionNameKeyPath: String? = nil, cacheName: String? = nil) throws -> NSFetchedResultsController<NSManagedObject> {
+      precondition(Thread.isMainThread, "You must ONLY create an NSFetchedResultsController from the Main Thread")
+      let request = try fetchRequest(query: query)
+      return NSFetchedResultsController(fetchRequest: request, managedObjectContext: currentThreadContext(), sectionNameKeyPath: sectionNameKeyPath, cacheName: nil)
     }
     
   }
+
 #endif
 
 extension NSManagedObjectContext {
@@ -97,17 +86,17 @@ extension NSManagedObjectContext {
         return
       }
       
-      if self.parentContext != nil {
-        self.parentContext?.save(synchronous, completion: completion)
+      if self.parent != nil {
+        self.parent?.save(synchronous: synchronous, completion: completion)
       } else {
         completion?(nil)
       }
     }
     
     if synchronous {
-      performBlockAndWait(saveBlock)
+      performAndWait(saveBlock)
     } else {
-      performBlock(saveBlock)
+      perform(saveBlock)
     }
     
   }
