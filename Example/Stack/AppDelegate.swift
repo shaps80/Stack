@@ -31,5 +31,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   
   var window: UIWindow?
   
+  func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
+    
+    // this should be configured BEFORE the first time you access defaultStack()
+    Stack.configureDefaults { (config) -> () in
+      
+      // Stack supports various configurations, here we will setup a stack to use only the mainThread context for all operations
+      config.stackType = .ParentChild // .MainThreadOnly // .ManualMerge
+      
+      // We can also define the persistence type
+      config.persistenceType = .SQLite // .MemoryOnly // .Binary
+      
+      // checkout `config` to see what other options you can configure and what the defaults are
+    }
+    
+    return true
+  }
+  
 }
 

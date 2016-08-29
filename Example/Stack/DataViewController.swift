@@ -56,7 +56,7 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   }
   
   override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    guard fetchedResultsController.sections?.count > 0 else {
+    guard (fetchedResultsController.sections?.count ?? 0) > 0 else {
       return 0
     }
     
@@ -64,7 +64,8 @@ class DataViewController: UITableViewController, NSFetchedResultsControllerDeleg
   }
   
   func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
-    let cell = tableView.dequeueReusableCell(withIdentifier: "cell")!
+    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "personCell")
+    let cell = tableView.dequeueReusableCell(withIdentifier: "personCell", for: indexPath)
     
     if let person = fetchedResultsController.object(at: indexPath) as? Person {
       cell.textLabel?.text = person.name ?? "Unknown"

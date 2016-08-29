@@ -55,7 +55,7 @@ public final class Stack: CustomStringConvertible, Readable {
   }
   
   /// Holds onto the various Stacks in your application (1 or more)
-  private static var stacks = { return [String: Stack]() }()
+  fileprivate static var stacks = { return [String: Stack]() }()
   
   /// The persistent coordinator associated with this stack
   private let coordinator: NSPersistentStoreCoordinator
@@ -153,7 +153,7 @@ public final class Stack: CustomStringConvertible, Readable {
     return stack
   }
   
-  private init(config: StackConfiguration) {
+  fileprivate init(config: StackConfiguration) {
     self.configuration = config
     
     let model = NSManagedObjectModel.mergedModel(from: nil)
@@ -193,7 +193,7 @@ public final class Stack: CustomStringConvertible, Readable {
   }
   
   func contextDidSaveContext(note: NSNotification, contextHandler: StackContextHandler) {
-    if note.object === mainContext {
+    if let context = note.object as? NSManagedObjectContext, context === mainContext {
       return
     }
     
@@ -212,10 +212,10 @@ public final class Stack: CustomStringConvertible, Readable {
     }
   }
   
-  public func write(transaction: (transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)?) {
+  public func write(transaction: @escaping (_ transaction: Transaction) throws -> Void, completion: ((NSError?) -> Void)?) {
     let block: () -> () = { [unowned self] in
       do {
-        try transaction(transaction: Transaction(stack: self, context: self.currentThreadContext()))
+        try transaction(Transaction(stack: self, context: self.currentThreadContext()))
         self.currentThreadContext().save(synchronous: true, completion: completion)
       } catch {
         completion?(error as NSError)
@@ -267,7 +267,7 @@ extension Stack {
   }
   
   /// Private: Returns the default Stack configuration
-  private static var DefaultConfiguration: StackConfiguration = {
+  fileprivate static var DefaultConfiguration: StackConfiguration = {
     return StackConfiguration(name: DefaultName)
   }()
   

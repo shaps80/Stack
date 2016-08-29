@@ -74,11 +74,11 @@ public final class StackConfiguration: CustomStringConvertible {
   public var stackType: StackType = .ParentChild
   
   /// Get/set the options you want to use to configure your NSPersistentStore
-  public lazy var storeOptions: [NSObject : AnyObject] = {
+  public lazy var storeOptions = {
     return [
       NSMigratePersistentStoresAutomaticallyOption: true,
       NSInferMappingModelAutomaticallyOption: true
-    ]
+    ] 
   }()
   
   /// Get/set the bundle where your model can be loaded from. Defaults to NSBundle.mainBundle()

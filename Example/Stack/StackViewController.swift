@@ -30,47 +30,33 @@ import Stack
 extension NSString {
   
   dynamic var initial: String? {
-    return String(uppercased.characters.first)
+    guard let char = uppercased.characters.first else { return nil }
+    return String(char)
   }
   
 }
 
-class ViewController: DataViewController {
+class StackViewController: DataViewController {
   
   // MARK: Stack Configuration, Add, Delete
   
   override func viewDidLoad() {
     super.viewDidLoad()
-  
-    // this should be configured BEFORE the first time you access defaultStack()
-    Stack.configureDefaults { (config) -> () in
-      
-      // Stack supports various configurations, here we will setup a stack to use only the mainThread context for all operations
-      config.stackType = .ParentChild // .MainThreadOnly // .ManualMerge
-      
-      // We can also define the persistence type
-      config.persistenceType = .SQLite // .MemoryOnly // .Binary
-      
-      // checkout `config` to see what other options you can configure and what the defaults are
-    }
     
-    // Now we have configured the stack, lets grab it
     let stack = Stack.defaultStack()
-    let person = try! stack.fetch(query: Query<Person>(key: "name", identifier: "Shaps")).first
-    print(person?.name)
     
     // Now lets setup a query for `Person`, sorting by the person's `name`
 //    let name = "Anne"
 //    let query = Query<Person>().filter("%K == %@", "name", name)
 //    let query = Query<Person>().filter("name == 'Anne'")
-    let query = Query<Person>().sort(byKey: "name.initial").sort(byKey: "name", direction: .Descending)
+    let query = Query<Person>().sort(byKey: "name.initial").sort(byKey: "name", direction: .descending)
     
     // We can now use a convenience init on `NSFetchedResultsController`
     fetchedResultsController = try! stack.newFetchedResultsController(query: query, sectionNameKeyPath: "name.initial")
     fetchedResultsController.delegate = self
 
     // in your application you may do this lazily
-    try! fetchedResultsController.performFetch()
+    try? fetchedResultsController.performFetch()
   }
   
   private func add(person name: NSString) {
@@ -92,7 +78,7 @@ class ViewController: DataViewController {
     let stack = Stack.defaultStack()
     let person = fetchedResultsController.object(at: indexPath) as! Person
     
-    DispatchQueue.global(attributes: .qosUserInitiated).async {
+    DispatchQueue.global(qos: .userInitiated).async {
       // In order to delete, we need to use a `write` transaction
       stack.write(transaction: { (transaction) -> Void in
         // first we need to copy the object into the current transaction
@@ -120,16 +106,17 @@ class ViewController: DataViewController {
     }
     
     controller.addAction(UIAlertAction(title: "Submit", style: .default, handler: { (action) -> Void in
-      if let field = controller.textFields?.first, let name = field.text {
-          self.add(person: name)
-      }
+      guard let field = controller.textFields?.first else { return }
+      guard let name = field.text else { return }
+
+      self.add(person: name as NSString)
     }))
     
     controller.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     present(controller, animated: true, completion: nil)
   }
   
-  func handleError(error: ErrorProtocol) {
+  func handleError(error: Error) {
     let controller = UIAlertController(title: "Stack", message: "\(error)", preferredStyle: .alert)
     controller.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     present(controller, animated: true, completion: nil)

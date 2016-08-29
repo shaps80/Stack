@@ -34,8 +34,8 @@ import CoreData
  - Descending: Sorts in descending order
  */
 public enum SortDirection {
-  case Ascending
-  case Descending
+  case ascending
+  case descending
 }
 
 /**
@@ -46,9 +46,9 @@ public enum SortDirection {
  - Dictionaries:     The query will return dictionaries in its result
  */
 public enum QueryResultType {
-  case ManagedObjects
-  case ManagedObjectIDs
-  case Dictionaries
+  case managedObjects
+  case managedObjectIDs
+  case dictionaries
   
   /**
    A convenience function to convert a QueryResultType to an NSFetchRequestResultType
@@ -57,11 +57,11 @@ public enum QueryResultType {
    */
   func toFetchRequestResultType() -> NSFetchRequestResultType {
     switch self {
-    case .ManagedObjects:
+    case .managedObjects:
       return []
-    case .Dictionaries:
+    case .dictionaries:
       return .dictionaryResultType
-    case .ManagedObjectIDs:
+    case .managedObjectIDs:
       return .managedObjectIDResultType
     }
   }
@@ -116,7 +116,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    - returns: The modified query
    */
   public func include(properties properties: [String]) -> Query<T> {
-    includeProperties = properties
+    includeProperties = properties as [AnyObject]
     return self
   }
   
@@ -152,8 +152,8 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The modified query
    */
-  public func sort(byKey key: String, direction: SortDirection = .Ascending) -> Query<T> {
-    let sortDescriptor = SortDescriptor(key: key, ascending: direction == .Ascending)
+  public func sort(byKey key: String, direction: SortDirection = .ascending) -> Query<T> {
+    let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .ascending)
     sortDescriptors.append(sortDescriptor)
     return self
   }
@@ -167,7 +167,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public func sort(byKeys keys: [String: SortDirection]) -> Query<T> {
     for (key, direction) in keys {
-      let sortDescriptor = SortDescriptor(key: key, ascending: direction == .Ascending)
+      let sortDescriptor = NSSortDescriptor(key: key, ascending: direction == .ascending)
       sortDescriptors.append(sortDescriptor)
     }
     
@@ -181,7 +181,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The modified query
    */
-  public func sort(bySortDescriptors descriptors: [SortDescriptor]) -> Query<T> {
+  public func sort(bySortDescriptors descriptors: [NSSortDescriptor]) -> Query<T> {
     sortDescriptors.append(contentsOf: descriptors)
     return self
   }
@@ -193,7 +193,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    
    - returns: The modified query
    */
-  public func filter(predicate pred: Predicate) -> Query<T> {
+  public func filter(predicate pred: NSPredicate) -> Query<T> {
     self.predicate = pred
     return self
   }
@@ -207,7 +207,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    - returns: The modified query
    */
   public func filter(format: String, _ args: AnyObject...) -> Query<T> {
-    self.predicate = Predicate(format: format, argumentArray: args)
+    self.predicate = NSPredicate(format: format, argumentArray: args)
     return self
   }
   
@@ -283,7 +283,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public convenience init<ID: StackManagedKey>(key: String, identifier: ID) {
     self.init()
-    predicate = Predicate(format: "%K == %@", key, identifier)
+    predicate = NSPredicate(format: "%K == %@", key, identifier)
   }
   
   /**
@@ -296,7 +296,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
    */
   public convenience init<IDs: StackManagedKey>(key: String, identifiers: [IDs]) {
     self.init()
-    predicate = Predicate(format: "%K IN %@", key, identifiers)
+    predicate = NSPredicate(format: "%K IN %@", key, identifiers)
   }
   
   // MARK: Internal 
@@ -321,8 +321,8 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
     description += "\n  offset:\t\t\t\(fetchOffset)"
     description += "\n  limit:\t\t\t\t\(fetchLimit)"
     description += "\n"
-    description += "\n  faulting:\t\t\t\(_returnsObjectsAsFaults == true && resultType == .ManagedObjectIDs ? "false (resultType == .ManagedObjectIDs)" : "\(returnsObjectsAsFaults)")"
-    description += "\n  distinct:\t\t\t\(_returnsDistinctResults == true && resultType != .Dictionaries ? "false (resultType != .Dictionaries)" : "\(returnsDistinctResults)")"
+    description += "\n  faulting:\t\t\t\(_returnsObjectsAsFaults == true && resultType == .managedObjectIDs ? "false (resultType == .ManagedObjectIDs)" : "\(returnsObjectsAsFaults)")"
+    description += "\n  distinct:\t\t\t\(_returnsDistinctResults == true && resultType != .dictionaries ? "false (resultType != .Dictionaries)" : "\(returnsDistinctResults)")"
     description += "\n"
     description += "\n  inc properties:\t\(includeProperties)"
     description += "\n  inc values:\t\t\(includesPropertyValues)"
@@ -334,10 +334,10 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   }
   
   /// Get/set the predicate for this query
-  private(set) var predicate: Predicate?
+  private(set) var predicate: NSPredicate?
   
   /// Get/set the sortDescriptors for this query
-  private(set) var sortDescriptors = [SortDescriptor]()
+  private(set) var sortDescriptors = [NSSortDescriptor]()
   
   /// Get/set the fetchBatchSize for this query. Defaults to 0
   private(set) var fetchBatchSize = 0
@@ -353,7 +353,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   private(set) var returnsObjectsAsFaults: Bool {
     set { _returnsObjectsAsFaults = newValue }
     get {
-      if _returnsObjectsAsFaults == true && resultType == .ManagedObjectIDs {
+      if _returnsObjectsAsFaults == true && resultType == .managedObjectIDs {
         return false
       }
       
@@ -366,7 +366,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   private(set) var returnsDistinctResults: Bool {
     set { _returnsDistinctResults = newValue }
     get {
-      if _returnsDistinctResults == true && resultType != .Dictionaries {
+      if _returnsDistinctResults == true && resultType != .dictionaries {
         return false
       }
       
@@ -390,7 +390,7 @@ public class Query<T: NSManagedObject>: CustomDebugStringConvertible, CustomStri
   private(set) var includeRelationships: [String]?
   
   /// Get/set the result type you want from this query. Setting the value to .ManagedObjectIDs will demote any sort orderings to "best effort" hints if property values are not included in the request.
-  public var resultType: QueryResultType = .ManagedObjects
+  public var resultType: QueryResultType = .managedObjects
   
   /**
    A convenience function for returns a configured NSFetchRequest based on this query

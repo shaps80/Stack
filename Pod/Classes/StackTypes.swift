@@ -114,7 +114,7 @@ Used throughout Stack to provide finer grained error handling
 - InvalidResultType:          The result type expected from a fetch request was invalid
 - FetchError:                 A generic error occurred
 */
-public enum StackError: ErrorProtocol {
+public enum StackError: Error {
   case EntityNameNotFoundForClass(AnyClass)
   case EntityNotFoundInStack(Stack, String)
   case InvalidResultType(AnyClass.Type)

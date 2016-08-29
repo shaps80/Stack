@@ -24,6 +24,7 @@
  */
 
 import CoreData
+import Foundation
 
 /**
  Combines two NSPredicate using [NSCompoundPredicate andPredicateWithSubpredicates:]
@@ -33,8 +34,8 @@ import CoreData
  
  - returns: An NSCompoundPredicate
  */
-public func && (left: Predicate, right: Predicate) -> Predicate {
-  return CompoundPredicate(type: .and, subpredicates: [left, right])
+public func && (left: NSPredicate, right: NSPredicate) -> NSPredicate {
+  return NSCompoundPredicate(type: .and, subpredicates: [left, right])
 }
 
 
@@ -46,8 +47,8 @@ public func && (left: Predicate, right: Predicate) -> Predicate {
  
  - returns: An NSCompoundPredicate
  */
-public func || (left: Predicate, right: Predicate) -> Predicate {
-  return CompoundPredicate(type: .or, subpredicates: [left, right])
+public func || (left: NSPredicate, right: NSPredicate) -> NSPredicate {
+  return NSCompoundPredicate(type: .or, subpredicates: [left, right])
 }
 
 #if os(iOS)

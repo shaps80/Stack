@@ -51,7 +51,7 @@ public class Transaction: Readable, Writable {
    Inserts a new entity of the specified class. Usage: `insert() as EntityName`
    */
   public func insert<T: NSManagedObject>() throws -> T {
-    guard let entityName = stack.entityNameForManagedObjectClass(T) where entityName != NSStringFromClass(NSManagedObject) else {
+    guard let entityName = stack.entityNameForManagedObjectClass(T), entityName != NSStringFromClass(NSManagedObject) else {
       throw StackError.EntityNameNotFoundForClass(T)
     }
     
